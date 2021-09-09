@@ -25,10 +25,11 @@ func (key IntTestKey) KeyInt() int {
 var wg sync.WaitGroup
 var skList SkipList
 
-const MAX_OPERATION = 300000
+const MAX_OPERATION = 400000
+const LEVEL_COUNT = 32
 
 func Test_ConcurrenyOperation(t *testing.T) {
-	skList = New(5)
+	skList = New(LEVEL_COUNT)
 	rand.Seed(time.Now().UnixNano())
 	//keySlice := make([]IntTestKey, 200000)
 	wg.Add(4)
@@ -69,7 +70,7 @@ func Test_ConcurrenyOperation(t *testing.T) {
 }
 
 func Test_BasciFunctionTest(t *testing.T) {
-	skList = New(5)
+	skList = New(LEVEL_COUNT)
 	rand.Seed(time.Now().UnixNano())
 	keySlice := make([]IntTestKey, 20000)
 	for i := 0; i < 20000; i++ {
@@ -88,4 +89,5 @@ func Test_BasciFunctionTest(t *testing.T) {
 	for i := 0; i < 20000; i++ {
 		skList.Delete(keySlice[i])
 	}
+	skList.Show()
 }

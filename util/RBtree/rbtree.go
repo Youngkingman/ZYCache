@@ -14,7 +14,7 @@ type RBTreeNode struct {
 	Left   *RBTreeNode
 	Right  *RBTreeNode
 	Parent *RBTreeNode
-	Color  uint
+	Color  uint8
 
 	key keystruct.KeyStruct
 	val interface{}
@@ -30,7 +30,7 @@ type RBTreeNode struct {
 */
 type RBTree struct {
 	root         *RBTreeNode
-	_NIL         *RBTreeNode
+	_NIL         *RBTreeNode //to avoid hanging pointer, but not necessary
 	elementCount int
 	mtx          sync.RWMutex
 }
@@ -81,55 +81,138 @@ func (rbt *RBTree) rightRotate(x *RBTreeNode) {
 	x.Parent = y
 }
 
-func (rbt *RBTree) insert(z *RBTreeNode) *RBTreeNode {
+func (rbt *RBTree) insert(i *RBTreeNode) *RBTreeNode {
 	//step 1: insert the node like normal binary search tree
+	//set its color red
 	//left is small and right is big
-	x := rbt.root
-	y := rbt._NIL
+	cur := rbt.root
+	pos := rbt._NIL
 
-	for x != rbt._NIL {
-		y = x
-		if x.key.CompareBiggerThan(z.key) {
-			x = x.Left
-		} else if z.key.CompareBiggerThan(x.key) {
-			x = x.Right
+	for cur != rbt._NIL {
+		pos = cur
+		if cur.key.CompareBiggerThan(i.key) {
+			cur = cur.Left
+		} else if i.key.CompareBiggerThan(cur.key) {
+			cur = cur.Right
 		} else {
-			return x
+			//maybe change the value here
+			return cur
 		}
 	}
 
-	z.Parent = y
-	if y == rbt._NIL {
+	i.Parent = pos
+	if pos == rbt._NIL {
 		//there is not root
-		rbt.root = z
-	} else if y.key.CompareBiggerThan(z.key) {
-		y.Left = z
+		rbt.root = i
+	} else if pos.key.CompareBiggerThan(i.key) {
+		pos.Left = i
 	} else {
-		y.Right = z
+		pos.Right = i
 	}
 	rbt.elementCount++
-	rbt.fixAfterInsert(z)
-	return z
+	//step 2 : maintains the balance tree
+	rbt.fixAfterInsert(i)
+	return i
 }
 
-func (rbt *RBTree) fixAfterInsert(z *RBTreeNode) {
+func (rbt *RBTree) fixAfterInsert(i *RBTreeNode) {
 	//new node z is a red node
-	for z.Parent.Color == RED {
-		if z.Parent == z.Parent.Parent.Left {
+	//if z's parent is black, it can insert directly & won't change the consistent
+	//from bottom to top, maintains the consistent of RBTree
+	for i.Parent.Color == RED {
+		if i.Parent == i.Parent.Parent.Left {
 			//y is an uncle node
-			y := z.Parent.Parent.Right
-			if y.Color == RED {
-				z.Parent.Color = BLACK
-				y.Color = BLACK
-				z.Parent.Parent.Color = RED
-				z = z.Parent.Parent
+			uncle := i.Parent.Parent.Right
+			if uncle.Color == RED {
+				i.Parent.Color = BLACK
+				uncle.Color = BLACK
+				i.Parent.Parent.Color = RED
+				//and it will continue, if z is the root, it should be black
+				//if new z's parent is black, we do nothing
+				i = i.Parent.Parent
 			} else {
-				if z == z.Parent.Right {
-
+				if i == i.Parent.Right {
+					i = i.Parent
+					rbt.leftRotate(i)
 				}
+				i.Parent.Color = BLACK
+				i.Parent.Parent.Color = RED
+				rbt.rightRotate(i.Parent.Parent)
+			}
+		} else {
+			uncle := i.Parent.Parent.Left
+			if uncle.Color == RED {
+				i.Parent.Color = BLACK
+				uncle.Color = BLACK
+				i.Parent.Parent.Color = RED
+				i = i.Parent.Parent
+			} else {
+				if i == i.Parent.Left {
+					i = i.Parent
+					rbt.rightRotate(i)
+				}
+				i.Parent.Color = BLACK
+				i.Parent.Parent.Color = RED
+				rbt.leftRotate(i.Parent.Parent)
 			}
 		}
 	}
+	rbt.root.Color = BLACK
+}
+
+func (rbt *RBTree) findSuccessor(cur *RBTreeNode) *RBTreeNode {
+	if cur == rbt._NIL {
+		return cur
+	}
+
+	if cur.Right != rbt._NIL {
+		tmp := cur.Right
+		for tmp.Left != rbt._NIL {
+			tmp = tmp.Left
+		}
+		return tmp
+	}
+
+	tmp := cur.Parent
+	for tmp != rbt._NIL && cur == tmp.Right {
+		cur = tmp
+	}
+	return tmp
+}
+
+func (rbt *RBTree) delete(key keystruct.KeyStruct) *RBTreeNode {
+	toDelete := rbt.search(key)
+	if toDelete == rbt._NIL {
+		return toDelete
+	}
+	//a copy of node to delete
+	ret := &RBTreeNode{
+		Left:   rbt._NIL,
+		Right:  rbt._NIL,
+		Parent: rbt._NIL,
+		Color:  toDelete.Color,
+		key:    toDelete.key,
+		val:    toDelete.val,
+	}
+
+	return ret
+}
+
+//used for inner search and can be package to outside
+func (rbt *RBTree) search(key keystruct.KeyStruct) *RBTreeNode {
+	cur := rbt.root
+
+	for cur != rbt._NIL {
+		if cur.key.CompareBiggerThan(key) {
+			cur = cur.Right
+		} else if key.CompareBiggerThan(cur.key) {
+			cur = cur.Left
+		} else {
+			break
+		}
+	}
+
+	return cur
 }
 
 func New() (rbt RBTree) {
