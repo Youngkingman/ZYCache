@@ -1,16 +1,17 @@
 package main
 
 import (
-	skiplistwithgo "basic/util/skipList"
+	keystruct "basic/util/KeyStruct"
+	skiplist "basic/util/skipList"
 	"fmt"
 )
 
 type IntTestKey struct {
-	skiplistwithgo.ParameterListSkey
+	keystruct.DefaultKey
 	key int
 }
 
-func (key IntTestKey) CompareBiggerThan(other skiplistwithgo.SListKey) bool {
+func (key IntTestKey) CompareBiggerThan(other keystruct.KeyStruct) bool {
 	return key.key > other.KeyInt32()
 }
 
@@ -19,12 +20,12 @@ func (key IntTestKey) KeyInt32() int {
 }
 
 func main() {
-	sklist := skiplistwithgo.GetSkipList(5)
+	sklist := skiplist.New(5)
 	for i := 0; i < 20; i++ {
-		key := IntTestKey{skiplistwithgo.ParameterListSkey{}, i}
+		key := IntTestKey{keystruct.DefaultKey{}, i}
 		sklist.InsertElement(key, "fuck you")
 	}
-	has, val := sklist.Search(IntTestKey{skiplistwithgo.ParameterListSkey{}, 60})
+	has, val := sklist.Search(IntTestKey{keystruct.DefaultKey{}, 60})
 	fmt.Println(has, val)
 	sklist.Show()
 }

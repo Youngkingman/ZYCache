@@ -1,38 +1,12 @@
-package skiplistwithgo
+package skiplist
 
 import (
+	keystruct "basic/util/KeyStruct"
 	"fmt"
 	"math/rand"
 	"sync"
 	"time"
 )
-
-//as an ordered data struct, the key should be able to compare
-//currently supoort 3 kinds of data type
-type SListKey interface {
-	CompareBiggerThan(other SListKey) bool
-	KeyString() string
-	KeyInt32() int
-	KeyInt64() int64
-}
-
-//Generally you should define an struct contains ParameterListSkey,
-//Then, you should implement the key you want
-//Basically string is enough for most of the situation
-type ParameterListSkey struct{}
-
-func (p ParameterListSkey) CompareBiggerThan(other SListKey) bool {
-	return false
-}
-func (p ParameterListSkey) KeyString() string {
-	return ""
-}
-func (p ParameterListSkey) KeyInt32() int {
-	return 0
-}
-func (p ParameterListSkey) KeyInt64() int64 {
-	return 0
-}
 
 /* ************************************************************************
 /********************IMPLEMENT OF SKIPLIST********************************
@@ -41,7 +15,7 @@ func (p ParameterListSkey) KeyInt64() int64 {
 //basic element for skiplist
 type skipListNode struct {
 	level       int
-	key         SListKey
+	key         keystruct.KeyStruct
 	val         interface{}
 	ForwardList []*skipListNode
 }
@@ -54,7 +28,7 @@ func (node *skipListNode) getVal() interface{} {
 	return node.val
 }
 
-func (node *skipListNode) getKey() SListKey {
+func (node *skipListNode) getKey() keystruct.KeyStruct {
 	return node.key
 }
 
@@ -84,7 +58,7 @@ func (skList *SkipList) getRamdomLevel() (ret int) {
 }
 
 //node initialize function
-func (skList *SkipList) createNode(key SListKey, val interface{}, level int) *skipListNode {
+func (skList *SkipList) createNode(key keystruct.KeyStruct, val interface{}, level int) *skipListNode {
 	ret := skipListNode{
 		level:       level,
 		key:         key,
@@ -95,7 +69,7 @@ func (skList *SkipList) createNode(key SListKey, val interface{}, level int) *sk
 }
 
 //if the key already exists, return -1, else insert the node
-func (skList *SkipList) InsertElement(key SListKey, val interface{}) int {
+func (skList *SkipList) InsertElement(key keystruct.KeyStruct, val interface{}) int {
 	skList.mtx.Lock()
 	current := skList.head
 	update := make([]*skipListNode, skList.levelMax+1)
@@ -143,7 +117,7 @@ func (skList *SkipList) InsertElement(key SListKey, val interface{}) int {
 }
 
 //if the key already exists, change the value, else insert the node
-func (skList *SkipList) UpdateDuplicateKey(key SListKey, val interface{}) {
+func (skList *SkipList) UpdateDuplicateKey(key keystruct.KeyStruct, val interface{}) {
 	skList.mtx.Lock()
 	current := skList.head
 	update := make([]*skipListNode, skList.levelMax+1)
@@ -192,7 +166,7 @@ func (skList *SkipList) UpdateDuplicateKey(key SListKey, val interface{}) {
 }
 
 //with given key, return if the key exists
-func (skList *SkipList) Search(key SListKey) (bool, interface{}) {
+func (skList *SkipList) Search(key keystruct.KeyStruct) (bool, interface{}) {
 	//skList.mtx.RLock()
 	current := skList.head
 	for i := skList.currentLevel; i >= 0; i-- {
@@ -215,7 +189,7 @@ func (skList *SkipList) Search(key SListKey) (bool, interface{}) {
 	return false, nil
 }
 
-func (skList *SkipList) Delete(key SListKey) int {
+func (skList *SkipList) Delete(key keystruct.KeyStruct) int {
 	skList.mtx.Lock()
 	current := skList.head
 	update := make([]*skipListNode, skList.levelMax+1)
@@ -269,7 +243,7 @@ func (skList *SkipList) Show() {
 }
 
 //contructor of the SkipList
-func GetSkipList(maxLevel int) (ret SkipList) {
+func New(maxLevel int) (ret SkipList) {
 	ret = SkipList{
 		head:         ret.createNode(nil, "I am the head", maxLevel),
 		tail:         nil,

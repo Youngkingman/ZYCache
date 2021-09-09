@@ -1,6 +1,7 @@
-package skiplistwithgo
+package skiplist
 
 import (
+	keystruct "basic/util/KeyStruct"
 	"math/rand"
 	"sync"
 	"testing"
@@ -9,11 +10,11 @@ import (
 
 //Implement of SlistKey
 type IntTestKey struct {
-	ParameterListSkey
+	keystruct.DefaultKey
 	key int
 }
 
-func (key IntTestKey) CompareBiggerThan(other SListKey) bool {
+func (key IntTestKey) CompareBiggerThan(other keystruct.KeyStruct) bool {
 	return key.key > other.KeyInt32()
 }
 
@@ -27,13 +28,13 @@ var skList SkipList
 const MAX_OPERATION = 300000
 
 func Test_ConcurrenyOperation(t *testing.T) {
-	skList = GetSkipList(5)
+	skList = New(5)
 	rand.Seed(time.Now().UnixNano())
 	//keySlice := make([]IntTestKey, 200000)
 	wg.Add(4)
 	go func() {
 		for i := 0; i < MAX_OPERATION; i++ {
-			key := IntTestKey{ParameterListSkey{}, int(rand.Uint32())}
+			key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
 			skList.InsertElement(key, "fuck you")
 		}
 		wg.Done()
@@ -41,7 +42,7 @@ func Test_ConcurrenyOperation(t *testing.T) {
 
 	go func() {
 		for i := 0; i < MAX_OPERATION; i++ {
-			key := IntTestKey{ParameterListSkey{}, int(rand.Uint32())}
+			key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
 			//keySlice[i] = key
 			skList.UpdateDuplicateKey(key, "fuck you")
 		}
@@ -50,7 +51,7 @@ func Test_ConcurrenyOperation(t *testing.T) {
 
 	go func() {
 		for i := 0; i < MAX_OPERATION; i++ {
-			key := IntTestKey{ParameterListSkey{}, int(rand.Uint32())}
+			key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
 			skList.Search(key)
 		}
 		wg.Done()
@@ -58,7 +59,7 @@ func Test_ConcurrenyOperation(t *testing.T) {
 
 	go func() {
 		for i := 0; i < MAX_OPERATION; i++ {
-			key := IntTestKey{ParameterListSkey{}, int(rand.Uint32())}
+			key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
 			skList.Delete(key)
 		}
 		wg.Done()
@@ -68,20 +69,20 @@ func Test_ConcurrenyOperation(t *testing.T) {
 }
 
 func Test_BasciFunctionTest(t *testing.T) {
-	skList = GetSkipList(5)
+	skList = New(5)
 	rand.Seed(time.Now().UnixNano())
 	keySlice := make([]IntTestKey, 20000)
 	for i := 0; i < 20000; i++ {
-		key := IntTestKey{ParameterListSkey{}, int(rand.Uint32())}
+		key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
 		skList.InsertElement(key, "fuck you")
 	}
 	for i := 0; i < 20000; i++ {
-		key := IntTestKey{ParameterListSkey{}, int(rand.Uint32())}
+		key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
 		keySlice[i] = key
 		skList.UpdateDuplicateKey(key, "fuck you")
 	}
 	for i := 0; i < 20000; i++ {
-		key := IntTestKey{ParameterListSkey{}, int(rand.Uint32())}
+		key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
 		skList.Search(key)
 	}
 	for i := 0; i < 20000; i++ {
