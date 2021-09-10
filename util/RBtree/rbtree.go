@@ -182,8 +182,6 @@ func (rbt *RBTree) findSuccessor(cur *RBTreeNode) *RBTreeNode {
 
 func (rbt *RBTree) delete(key keystruct.KeyStruct) *RBTreeNode {
 	toDelete := rbt.search(key)
-	//the positon of toDelete my not be delete
-	//but its content will shift to replacenode to delete
 	if toDelete == rbt._NIL {
 		return toDelete
 	}
