@@ -81,10 +81,11 @@ func (rbt *RBTree) rightRotate(x *RBTreeNode) {
 	x.Parent = y
 }
 
-func (rbt *RBTree) insert(i *RBTreeNode) *RBTreeNode {
+func (rbt *RBTree) insert(i *RBTreeNode, update bool) *RBTreeNode {
 	//step 1: insert the node like normal binary search tree
 	//set its color red
 	//left is small and right is big
+	rbt.mtx.Lock()
 	cur := rbt.root
 	pos := rbt._NIL
 
@@ -96,6 +97,10 @@ func (rbt *RBTree) insert(i *RBTreeNode) *RBTreeNode {
 			cur = cur.Right
 		} else {
 			//maybe change the value here
+			if update {
+				cur.val = i.val
+			}
+			rbt.mtx.Unlock()
 			return cur
 		}
 	}
@@ -112,6 +117,7 @@ func (rbt *RBTree) insert(i *RBTreeNode) *RBTreeNode {
 	rbt.elementCount++
 	//step 2 : maintains the balance tree
 	rbt.fixAfterInsert(i)
+	rbt.mtx.Unlock()
 	return i
 }
 
@@ -181,8 +187,10 @@ func (rbt *RBTree) findSuccessor(cur *RBTreeNode) *RBTreeNode {
 }
 
 func (rbt *RBTree) delete(key keystruct.KeyStruct) *RBTreeNode {
+	rbt.mtx.Lock()
 	toDelete := rbt.search(key)
 	if toDelete == rbt._NIL {
+		rbt.mtx.Unlock()
 		return toDelete
 	}
 	//a copy of node to delete
@@ -224,14 +232,14 @@ func (rbt *RBTree) delete(key keystruct.KeyStruct) *RBTreeNode {
 		toDelete.key = replaceNode.key
 		toDelete.val = replaceNode.val
 	}
-
+	//maybe use context
 	//delete the red one won't change the RBTree property
 	if replaceNode.Color == BLACK {
 		rbt.fixAfterDelete(fixNode)
 	}
 
 	rbt.elementCount--
-
+	rbt.mtx.Unlock()
 	return ret
 }
 
