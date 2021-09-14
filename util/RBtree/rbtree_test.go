@@ -18,7 +18,7 @@ func (key IntTestKey) CompareBiggerThan(other keystruct.KeyStruct) bool {
 	return key.key > other.KeyInt32()
 }
 
-func (key IntTestKey) KeyInt() int {
+func (key IntTestKey) KeyInt32() int {
 	return key.key
 }
 
