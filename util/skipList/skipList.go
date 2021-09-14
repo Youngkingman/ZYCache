@@ -254,3 +254,29 @@ func New(maxLevel int) (ret SkipList) {
 	}
 	return
 }
+
+//return top n elements
+func (skList *SkipList) TopN(count int) (keys []keystruct.KeyStruct, vals []interface{}) {
+	current := skList.head
+	if count < skList.elementCount {
+		for i := 0; i <= skList.levelMax; i++ {
+			for current.ForwardList[i] != nil {
+				current = current.ForwardList[i]
+				keys = append(keys, current.key)
+				vals = append(vals, current.val)
+			}
+		}
+	} else {
+		tmp := 0
+		for i := 0; i <= skList.levelMax; i++ {
+			for current.ForwardList[i] != nil && tmp < count {
+				current = current.ForwardList[i]
+				keys = append(keys, current.key)
+				vals = append(vals, current.val)
+				tmp++
+			}
+		}
+	}
+
+	return
+}

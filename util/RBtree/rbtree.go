@@ -235,8 +235,60 @@ func (rbt *RBTree) delete(key keystruct.KeyStruct) *RBTreeNode {
 	return ret
 }
 
-func (rbt *RBTree) fixAfterDelete(x *RBTreeNode) {
-
+func (rbt *RBTree) fixAfterDelete(fixNode *RBTreeNode) {
+	for fixNode != rbt.root && fixNode.Color == BLACK {
+		if fixNode == fixNode.Parent.Left {
+			brother := fixNode.Parent.Right
+			if brother.Color == RED {
+				brother.Color = BLACK
+				fixNode.Parent.Color = RED
+				rbt.leftRotate(fixNode.Parent)
+				brother = fixNode.Parent.Right
+			}
+			if brother.Left.Color == BLACK && brother.Right.Color == BLACK {
+				brother.Color = RED
+				fixNode = fixNode.Parent
+			} else {
+				if brother.Right.Color == BLACK {
+					brother.Left.Color = BLACK
+					brother.Color = RED
+					rbt.rightRotate(brother)
+					brother = fixNode.Parent.Right
+				}
+				brother.Color = fixNode.Parent.Color
+				fixNode.Parent.Color = BLACK
+				brother.Right.Color = BLACK
+				rbt.leftRotate(fixNode.Parent)
+				// this is to exit while loop
+				fixNode = rbt.root
+			}
+		} else { // the code below is has left and right switched from above
+			w := fixNode.Parent.Left
+			if w.Color == RED {
+				w.Color = BLACK
+				fixNode.Parent.Color = RED
+				rbt.rightRotate(fixNode.Parent)
+				w = fixNode.Parent.Left
+			}
+			if w.Left.Color == BLACK && w.Right.Color == BLACK {
+				w.Color = RED
+				fixNode = fixNode.Parent
+			} else {
+				if w.Left.Color == BLACK {
+					w.Right.Color = BLACK
+					w.Color = RED
+					rbt.leftRotate(w)
+					w = fixNode.Parent.Left
+				}
+				w.Color = fixNode.Parent.Color
+				fixNode.Parent.Color = BLACK
+				w.Left.Color = BLACK
+				rbt.rightRotate(fixNode.Parent)
+				fixNode = rbt.root
+			}
+		}
+	}
+	fixNode.Color = BLACK
 }
 
 //used for inner search and can be package to outside
