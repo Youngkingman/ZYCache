@@ -25,7 +25,7 @@ func (key IntTestKey) KeyInt32() int {
 var wg sync.WaitGroup
 var rbt RBTree
 
-const MAX_OPERATION = 4000000 //the max number of single CRUD operation
+const MAX_OPERATION = 600000 //the max number of single CRUD operation
 
 func Test_ConcurrenyOperation(t *testing.T) {
 	rbt = New()

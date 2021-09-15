@@ -305,10 +305,11 @@ func (rbt *RBTree) search(key keystruct.KeyStruct) *RBTreeNode {
 
 	for cur != rbt._NIL {
 		if cur.key.CompareBiggerThan(key) {
-			cur = cur.Right
-		} else if key.CompareBiggerThan(cur.key) {
 			cur = cur.Left
-		} else {
+		} else if key.CompareBiggerThan(cur.key) {
+			cur = cur.Right
+		}
+		if cur.key == key {
 			break
 		}
 	}

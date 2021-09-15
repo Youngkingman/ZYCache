@@ -21,11 +21,13 @@ func (key IntTestKey) KeyInt32() int {
 
 func main() {
 	sklist := skiplist.New(5)
+	tmp := IntTestKey{}
 	for i := 0; i < 20; i++ {
 		key := IntTestKey{keystruct.DefaultKey{}, i}
+		tmp = key
 		sklist.InsertElement(key, "fuck you")
 	}
-	has, val := sklist.Search(IntTestKey{keystruct.DefaultKey{}, 60})
+	has, val := sklist.Search(tmp)
 	fmt.Println(has, val)
 	sklist.Show()
 }
