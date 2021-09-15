@@ -2,6 +2,7 @@ package rbtree
 
 import (
 	keystruct "basic/util/KeyStruct"
+	"errors"
 )
 
 func (rbt *RBTree) InsertElement(key keystruct.KeyStruct, val interface{}) {
@@ -36,12 +37,12 @@ func (rbt *RBTree) Search(key keystruct.KeyStruct) (bool, interface{}) {
 	return true, ret.val
 }
 
-func (rbt *RBTree) Delete(key keystruct.KeyStruct) int {
+func (rbt *RBTree) Delete(key keystruct.KeyStruct) error {
 	ret := rbt.delete(key)
 	if ret == rbt._NIL {
-		return -1
+		return errors.New("no such element")
 	}
-	return 0
+	return nil
 }
 
 func (rbt *RBTree) Range() {

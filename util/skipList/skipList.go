@@ -2,6 +2,7 @@ package skiplist
 
 import (
 	keystruct "basic/util/KeyStruct"
+	"errors"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -189,7 +190,7 @@ func (skList *SkipList) Search(key keystruct.KeyStruct) (bool, interface{}) {
 	return false, nil
 }
 
-func (skList *SkipList) Delete(key keystruct.KeyStruct) int {
+func (skList *SkipList) Delete(key keystruct.KeyStruct) error {
 	skList.mtx.Lock()
 	current := skList.head
 	update := make([]*skipListNode, skList.levelMax+1)
@@ -223,11 +224,11 @@ func (skList *SkipList) Delete(key keystruct.KeyStruct) int {
 		skList.elementCount--
 		skList.mtx.Unlock()
 		//log.Println("element sucessfully delete")
-		return 0
+		return nil
 	}
 	//log.Println("not such element for delete")
 	skList.mtx.Unlock()
-	return -1
+	return errors.New("no such element")
 }
 
 //this is to show the member of the list
