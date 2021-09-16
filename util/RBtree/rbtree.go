@@ -16,14 +16,14 @@ type RBTreeNode struct {
 	Parent *RBTreeNode
 	Color  uint8
 
-	key keystruct.KeyStruct
-	val interface{}
+	key  keystruct.KeyStruct
+	item interface{}
 }
 
 /* 5 Attributes of RBTree
 1.the node is either red or black
 2.the root node is black
-3.every leaves node is black(and they have nil values)
+3.every leaves node is black(and they have nil itemues)
 4.if a node is red, its children are black
 5.every route from node to its successors poccesses same counts of black nodes
 
@@ -96,9 +96,9 @@ func (rbt *RBTree) insert(i *RBTreeNode, update bool) *RBTreeNode {
 		} else if i.key.CompareBiggerThan(cur.key) {
 			cur = cur.Right
 		} else {
-			//maybe change the value here
+			//maybe change the itemue here
 			if update {
-				cur.val = i.val
+				cur.item = i.item
 			}
 			rbt.mtx.Unlock()
 			return cur
@@ -200,7 +200,7 @@ func (rbt *RBTree) delete(key keystruct.KeyStruct) *RBTreeNode {
 		Parent: rbt._NIL,
 		Color:  toDelete.Color,
 		key:    toDelete.key,
-		val:    toDelete.val,
+		item:   toDelete.item,
 	}
 	replaceNode := toDelete //this node find the place to really delete and replace by todelete
 	fixNode := toDelete     //these node is the node to fix after origin node was replace and delete
@@ -230,7 +230,7 @@ func (rbt *RBTree) delete(key keystruct.KeyStruct) *RBTreeNode {
 
 	if replaceNode != toDelete {
 		toDelete.key = replaceNode.key
-		toDelete.val = replaceNode.val
+		toDelete.item = replaceNode.item
 	}
 	//maybe use context
 	//delete the red one won't change the RBTree property
@@ -302,7 +302,8 @@ func (rbt *RBTree) fixAfterDelete(fixNode *RBTreeNode) {
 //used for inner search and can be package to outside
 func (rbt *RBTree) search(key keystruct.KeyStruct) *RBTreeNode {
 	cur := rbt.root
-
+	rbt.mtx.RLock()
+	defer rbt.mtx.RUnlock()
 	for cur != rbt._NIL {
 		if cur.key.CompareBiggerThan(key) {
 			cur = cur.Left
@@ -313,7 +314,6 @@ func (rbt *RBTree) search(key keystruct.KeyStruct) *RBTreeNode {
 			break
 		}
 	}
-
 	return cur
 }
 

@@ -1,6 +1,7 @@
 package store
 
 import (
+	keystruct "basic/util/KeyStruct"
 	"errors"
 	"sync"
 	"time"
@@ -13,6 +14,7 @@ const DefaultDuration = 15 * time.Second
 type IService interface {
 	GetValue(key string) (value interface{}, err error)
 	SetValue(key string, value interface{}, expire time.Duration)
+	GetRanage(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error)
 }
 
 //MemItem the meme item
@@ -22,7 +24,7 @@ type MemItem struct {
 	duration time.Duration
 }
 
-type service struct {
+type serviceMap struct {
 	Store  map[string]*MemItem
 	ticker *time.Ticker
 	keyRL  *sync.RWMutex
@@ -33,7 +35,7 @@ var dbonce sync.Once
 
 func getService() IService {
 	dbonce.Do(func() {
-		s := &service{
+		s := &serviceMap{
 			Store:  map[string]*MemItem{},
 			ticker: time.NewTicker(time.Minute * 10),
 			keyRL:  new(sync.RWMutex),
@@ -65,7 +67,7 @@ func getService() IService {
 	return svs
 }
 
-func (svs *service) GetValue(key string) (value interface{}, err error) {
+func (svs *serviceMap) GetValue(key string) (value interface{}, err error) {
 	defer svs.keyRL.RUnlock()
 	svs.keyRL.RLock()
 	if mitem, ok := svs.Store[key]; ok {
@@ -78,7 +80,7 @@ func (svs *service) GetValue(key string) (value interface{}, err error) {
 	return nil, errors.New("no value")
 }
 
-func (svs *service) SetValue(key string, value interface{}, expire time.Duration) {
+func (svs *serviceMap) SetValue(key string, value interface{}, expire time.Duration) {
 	defer svs.keyRL.Unlock()
 	svs.keyRL.Lock()
 	if mitem, ok := svs.Store[key]; ok {
@@ -93,6 +95,10 @@ func (svs *service) SetValue(key string, value interface{}, expire time.Duration
 		expire,
 	}
 	svs.Store[key] = &m
+}
+
+func (svs *serviceMap) GetRanage(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error) {
+	return nil, errors.New("no support for unordered map")
 }
 
 //GetValue GetValue

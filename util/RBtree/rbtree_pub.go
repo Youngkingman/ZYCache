@@ -29,12 +29,12 @@ func (rbt *RBTree) UpdateDuplicateKey(key keystruct.KeyStruct, val interface{}) 
 	rbt.insert(&node, true)
 }
 
-func (rbt *RBTree) Search(key keystruct.KeyStruct) (bool, interface{}) {
+func (rbt *RBTree) Search(key keystruct.KeyStruct) (interface{}, bool) {
 	ret := rbt.search(key)
 	if ret == rbt._NIL {
-		return false, nil
+		return nil, false
 	}
-	return true, ret.val
+	return ret.item, true
 }
 
 func (rbt *RBTree) Delete(key keystruct.KeyStruct) error {

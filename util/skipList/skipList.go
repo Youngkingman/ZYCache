@@ -17,16 +17,16 @@ import (
 type skipListNode struct {
 	level       int
 	key         keystruct.KeyStruct
-	val         interface{}
+	item        interface{}
 	ForwardList []*skipListNode
 }
 
-func (node *skipListNode) setVal(val interface{}) {
-	node.val = val
+func (node *skipListNode) setVal(item interface{}) {
+	node.item = item
 }
 
 func (node *skipListNode) getVal() interface{} {
-	return node.val
+	return node.item
 }
 
 func (node *skipListNode) getKey() keystruct.KeyStruct {
@@ -59,18 +59,18 @@ func (skList *SkipList) getRamdomLevel() (ret int) {
 }
 
 //node initialize function
-func (skList *SkipList) createNode(key keystruct.KeyStruct, val interface{}, level int) *skipListNode {
+func (skList *SkipList) createNode(key keystruct.KeyStruct, item interface{}, level int) *skipListNode {
 	ret := skipListNode{
 		level:       level,
 		key:         key,
-		val:         val,
+		item:        item,
 		ForwardList: make([]*skipListNode, level+1),
 	}
 	return &ret
 }
 
 //if the key already exists, return -1, else insert the node
-func (skList *SkipList) InsertElement(key keystruct.KeyStruct, val interface{}) int {
+func (skList *SkipList) InsertElement(key keystruct.KeyStruct, item interface{}) int {
 	skList.mtx.Lock()
 	current := skList.head
 	update := make([]*skipListNode, skList.levelMax+1)
@@ -102,7 +102,7 @@ func (skList *SkipList) InsertElement(key keystruct.KeyStruct, val interface{}) 
 			skList.currentLevel = randomLevel
 		}
 
-		nodeToInsert := skList.createNode(key, val, randomLevel)
+		nodeToInsert := skList.createNode(key, item, randomLevel)
 
 		//insert the new node here, update every previous level node
 		for i := 0; i < randomLevel; i++ {
@@ -117,8 +117,8 @@ func (skList *SkipList) InsertElement(key keystruct.KeyStruct, val interface{}) 
 	return 0
 }
 
-//if the key already exists, change the value, else insert the node
-func (skList *SkipList) UpdateDuplicateKey(key keystruct.KeyStruct, val interface{}) {
+//if the key already exists, change the itemue, else insert the node
+func (skList *SkipList) UpdateDuplicateKey(key keystruct.KeyStruct, item interface{}) {
 	skList.mtx.Lock()
 	current := skList.head
 	update := make([]*skipListNode, skList.levelMax+1)
@@ -136,9 +136,9 @@ func (skList *SkipList) UpdateDuplicateKey(key keystruct.KeyStruct, val interfac
 	current = current.ForwardList[0] //reach the 0 level to insert an element
 
 	if current != nil && current.getKey() == key {
-		current.setVal(val)
+		current.setVal(item)
 		skList.mtx.Unlock()
-		//log.Println("already have val, sucessfully")
+		//log.Println("already have item, sucessfully")
 		return
 	}
 
@@ -152,7 +152,7 @@ func (skList *SkipList) UpdateDuplicateKey(key keystruct.KeyStruct, val interfac
 			skList.currentLevel = randomLevel
 		}
 
-		nodeToInsert := skList.createNode(key, val, randomLevel)
+		nodeToInsert := skList.createNode(key, item, randomLevel)
 
 		//insert the new node here, update every previous level node
 		for i := 0; i < randomLevel; i++ {
@@ -167,8 +167,8 @@ func (skList *SkipList) UpdateDuplicateKey(key keystruct.KeyStruct, val interfac
 }
 
 //with given key, return if the key exists
-func (skList *SkipList) Search(key keystruct.KeyStruct) (bool, interface{}) {
-	//skList.mtx.RLock()
+func (skList *SkipList) Search(key keystruct.KeyStruct) (interface{}, bool) {
+	skList.mtx.RLock()
 	current := skList.head
 	for i := skList.currentLevel; i >= 0; i-- {
 		//simple change the latter into
@@ -181,13 +181,13 @@ func (skList *SkipList) Search(key keystruct.KeyStruct) (bool, interface{}) {
 	current = current.ForwardList[0]
 
 	if current != nil && current.key == key {
-		//skList.mtx.RUnlock()
+		skList.mtx.RUnlock()
 		//log.Println("find key")
-		return true, current.getVal()
+		return current.getVal(), true
 	}
-	//skList.mtx.RUnlock()
+	skList.mtx.RUnlock()
 	//log.Println("key not found")
-	return false, nil
+	return nil, false
 }
 
 func (skList *SkipList) Delete(key keystruct.KeyStruct) error {
@@ -257,14 +257,14 @@ func New(maxLevel int) (ret SkipList) {
 }
 
 //return top n elements
-func (skList *SkipList) TopN(count int) (keys []keystruct.KeyStruct, vals []interface{}) {
+func (skList *SkipList) TopN(count int) (keys []keystruct.KeyStruct, items []interface{}) {
 	if count < skList.elementCount {
 		for i := 0; i < skList.currentLevel; i++ {
 			current := skList.head.ForwardList[i]
 			for current.ForwardList[i] != nil {
 				current = current.ForwardList[i]
 				keys = append(keys, current.key)
-				vals = append(vals, current.val)
+				items = append(items, current.item)
 			}
 		}
 	} else {
@@ -274,7 +274,7 @@ func (skList *SkipList) TopN(count int) (keys []keystruct.KeyStruct, vals []inte
 			for current.ForwardList[i] != nil && tmp < count {
 				current = current.ForwardList[i]
 				keys = append(keys, current.key)
-				vals = append(vals, current.val)
+				items = append(items, current.item)
 				tmp++
 			}
 		}
