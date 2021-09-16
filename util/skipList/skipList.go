@@ -282,3 +282,8 @@ func (skList *SkipList) TopN(count int) (keys []keystruct.KeyStruct, items []int
 
 	return
 }
+
+func (skList *SkipList) Range(condition func(interface{}) bool) (keys []keystruct.KeyStruct) {
+	//TODO pick all keys with condition limited value
+	return
+}

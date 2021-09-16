@@ -45,6 +45,7 @@ func (rbt *RBTree) Delete(key keystruct.KeyStruct) error {
 	return nil
 }
 
-func (rbt *RBTree) Range() {
-
+func (rbt *RBTree) Range(condition func(interface{}) bool) (keys []keystruct.KeyStruct) {
+	//TODO pick all keys with condition limited value
+	return
 }
