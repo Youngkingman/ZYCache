@@ -12,7 +12,7 @@ type serviceRBtree struct {
 	ticker *time.Ticker
 }
 
-func getServiceRBtree() IService {
+func getServiceRBtree() StoreService {
 	dbonce.Do(func() {
 		s := &serviceRBtree{
 			Store:  rbtree.New(),
@@ -63,7 +63,7 @@ func (svs *serviceRBtree) SetValue(key keystruct.KeyStruct, value interface{}, e
 	svs.Store.InsertElement(key, &m)
 }
 
-func (svs *serviceRBtree) GetRanage(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error) {
+func (svs *serviceRBtree) GetRange(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error) {
 	//TODO
 	return
 }

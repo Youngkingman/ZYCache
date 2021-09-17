@@ -317,13 +317,13 @@ func (rbt *RBTree) search(key keystruct.KeyStruct) *RBTreeNode {
 	return cur
 }
 
-func New() (rbt RBTree) {
-	initNode := &RBTreeNode{nil, nil, nil, BLACK, keystruct.DefaultKey{}, nil}
-	rbt = RBTree{
-		root:         initNode,
-		_NIL:         initNode,
-		elementCount: 0,
-		mtx:          sync.RWMutex{},
+func (rbt *RBTree) preOreder(cur *RBTreeNode, condition func(interface{}) bool, keys []keystruct.KeyStruct) {
+	if cur == rbt._NIL {
+		return
 	}
-	return
+	rbt.preOreder(cur.Left, condition, keys)
+	if condition(cur.item) {
+		keys = append(keys, cur.key)
+	}
+	rbt.preOreder(cur.Right, condition, keys)
 }

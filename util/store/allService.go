@@ -21,11 +21,11 @@ const DefaultService = MAP
 //sklist level
 const SKListLevel = 16
 
-//IService memservice
-type IService interface {
+//StoreService memservice
+type StoreService interface {
 	GetValue(key keystruct.KeyStruct) (value interface{}, err error)
 	SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration)
-	GetRanage(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error)
+	GetRange(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error)
 }
 
 type MemItem struct {
@@ -34,10 +34,10 @@ type MemItem struct {
 	duration time.Duration
 }
 
-var svs IService
+var svs StoreService
 var dbonce sync.Once
 
-func getService() IService {
+func getService() StoreService {
 	switch DefaultService {
 	case MAP:
 		return getServiceMap()

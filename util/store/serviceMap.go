@@ -13,7 +13,7 @@ type serviceMap struct {
 	keyRL  *sync.RWMutex //for default map is concurrency unsafe
 }
 
-func getServiceMap() IService {
+func getServiceMap() StoreService {
 	dbonce.Do(func() {
 		s := &serviceMap{
 			Store:  map[keystruct.KeyStruct]*MemItem{},
@@ -77,6 +77,6 @@ func (svs *serviceMap) SetValue(key keystruct.KeyStruct, value interface{}, expi
 	svs.Store[key] = &m
 }
 
-func (svs *serviceMap) GetRanage(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error) {
+func (svs *serviceMap) GetRange(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error) {
 	return nil, errors.New("no support for unordered map")
 }

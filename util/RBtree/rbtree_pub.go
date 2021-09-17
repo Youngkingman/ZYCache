@@ -3,6 +3,7 @@ package rbtree
 import (
 	keystruct "basic/util/KeyStruct"
 	"errors"
+	"sync"
 )
 
 func (rbt *RBTree) InsertElement(key keystruct.KeyStruct, val interface{}) {
@@ -46,6 +47,19 @@ func (rbt *RBTree) Delete(key keystruct.KeyStruct) error {
 }
 
 func (rbt *RBTree) Range(condition func(interface{}) bool) (keys []keystruct.KeyStruct) {
-	//TODO pick all keys with condition limited value
+	rbt.mtx.RLock()
+	rbt.preOreder(rbt.root, condition, keys)
+	rbt.mtx.RUnlock()
+	return
+}
+
+func New() (rbt RBTree) {
+	initNode := &RBTreeNode{nil, nil, nil, BLACK, keystruct.DefaultKey{}, nil}
+	rbt = RBTree{
+		root:         initNode,
+		_NIL:         initNode,
+		elementCount: 0,
+		mtx:          sync.RWMutex{},
+	}
 	return
 }

@@ -12,7 +12,7 @@ type serviceSkList struct {
 	ticker *time.Ticker
 }
 
-func getServiceSkList() IService {
+func getServiceSkList() StoreService {
 	dbonce.Do(func() {
 		s := &serviceSkList{
 			Store:  skiplist.New(SKListLevel),
@@ -63,7 +63,7 @@ func (svs *serviceSkList) SetValue(key keystruct.KeyStruct, value interface{}, e
 	svs.Store.InsertElement(key, &m)
 }
 
-func (svs *serviceSkList) GetRanage(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error) {
+func (svs *serviceSkList) GetRange(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error) {
 	//TODO
 	return
 }
