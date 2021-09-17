@@ -1,8 +1,8 @@
 package main
 
 import (
-	keystruct "basic/util/KeyStruct"
-	skiplist "basic/util/skipList"
+	keystruct "basic/zhenCache/innerDB/keystruct"
+	skiplist "basic/zhenCache/innerDB/skipList"
 	"fmt"
 )
 

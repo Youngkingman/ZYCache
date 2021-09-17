@@ -1,7 +1,7 @@
 package skiplist
 
 import (
-	keystruct "basic/util/KeyStruct"
+	keystruct "basic/zhenCache/innerDB/keystruct"
 	"math/rand"
 	"sync"
 	"testing"

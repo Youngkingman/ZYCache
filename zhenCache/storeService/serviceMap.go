@@ -1,7 +1,7 @@
 package store
 
 import (
-	keystruct "basic/util/KeyStruct"
+	keystruct "basic/zhenCache/innerDB/keystruct"
 	"errors"
 	"sync"
 	"time"

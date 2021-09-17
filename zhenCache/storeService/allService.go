@@ -1,7 +1,7 @@
 package store
 
 import (
-	keystruct "basic/util/KeyStruct"
+	keystruct "basic/zhenCache/innerDB/keystruct"
 	"sync"
 	"time"
 )
@@ -37,35 +37,36 @@ type MemItem struct {
 var svs StoreService
 var dbonce sync.Once
 
-func getService() StoreService {
-	switch DefaultService {
+func getService(service int) StoreService {
+	switch service {
 	case MAP:
 		return getServiceMap()
 	case RBTREE:
 		return getServiceRBtree()
 	case SKIPLIST:
 		return getServiceSkList()
+	default:
+		return getService(DefaultService)
 	}
-	return nil
 }
 
 //GetValue GetValue
-func GetValue(key keystruct.KeyStruct) (value interface{}, err error) {
-	return getService().GetValue(key)
+func GetValue(key keystruct.KeyStruct, service int) (value interface{}, err error) {
+	return getService(service).GetValue(key)
 }
 
 //SetValue SetValue
-func SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration) {
-	getService().SetValue(key, value, expire)
+func SetValue(key keystruct.KeyStruct, service int, value interface{}, expire time.Duration) {
+	getService(service).SetValue(key, value, expire)
 }
 
 //GetValueDefault  with default
 func GetValueDefault(key keystruct.KeyStruct, getV func() interface{}) interface{} {
-	if val, err := GetValue(key); err == nil {
+	if val, err := GetValue(key, DefaultService); err == nil {
 		return val
 	}
 
 	val := getV()
-	SetValue(key, val, time.Minute*3)
+	SetValue(key, DefaultService, val, time.Minute*3)
 	return val
 }

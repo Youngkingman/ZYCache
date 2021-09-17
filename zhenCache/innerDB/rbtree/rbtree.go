@@ -1,7 +1,7 @@
 package rbtree
 
 import (
-	keystruct "basic/util/KeyStruct"
+	keystruct "basic/zhenCache/innerDB/keystruct"
 	"sync"
 )
 
@@ -187,12 +187,11 @@ func (rbt *RBTree) findSuccessor(cur *RBTreeNode) *RBTreeNode {
 }
 
 func (rbt *RBTree) delete(key keystruct.KeyStruct) *RBTreeNode {
-	rbt.mtx.Lock()
 	toDelete := rbt.search(key)
 	if toDelete == rbt._NIL {
-		rbt.mtx.Unlock()
 		return toDelete
 	}
+	rbt.mtx.Lock()
 	//a copy of node to delete
 	ret := &RBTreeNode{
 		Left:   rbt._NIL,

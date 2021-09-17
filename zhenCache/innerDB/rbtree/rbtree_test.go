@@ -1,7 +1,7 @@
 package rbtree
 
 import (
-	keystruct "basic/util/KeyStruct"
+	keystruct "basic/zhenCache/innerDB/keystruct"
 	"math/rand"
 	"sync"
 	"testing"
@@ -25,7 +25,7 @@ func (key IntTestKey) KeyInt32() int {
 var wg sync.WaitGroup
 var rbt RBTree
 
-const MAX_OPERATION = 600000 //the max number of single CRUD operation
+const MAX_OPERATION = 600 //the max number of single CRUD operation
 
 func Test_ConcurrenyOperation(t *testing.T) {
 	rbt = New()
@@ -93,5 +93,4 @@ func Test_BasciFunctionTest(t *testing.T) {
 	for i := 0; i < MAX_OPERATION/2; i++ {
 		rbt.Delete(keySlice[i])
 	}
-	//rbt.Show()
 }

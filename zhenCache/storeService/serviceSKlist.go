@@ -1,21 +1,21 @@
 package store
 
 import (
-	keystruct "basic/util/KeyStruct"
-	"basic/util/rbtree"
+	keystruct "basic/zhenCache/innerDB/keystruct"
+	skiplist "basic/zhenCache/innerDB/skipList"
 	"errors"
 	"time"
 )
 
-type serviceRBtree struct {
-	Store  rbtree.RBTree
+type serviceSkList struct {
+	Store  skiplist.SkipList
 	ticker *time.Ticker
 }
 
-func getServiceRBtree() StoreService {
+func getServiceSkList() StoreService {
 	dbonce.Do(func() {
-		s := &serviceRBtree{
-			Store:  rbtree.New(),
+		s := &serviceSkList{
+			Store:  skiplist.New(SKListLevel),
 			ticker: time.NewTicker(time.Minute * 60),
 		}
 		svs = s
@@ -38,7 +38,7 @@ func getServiceRBtree() StoreService {
 	return svs
 }
 
-func (svs *serviceRBtree) GetValue(key keystruct.KeyStruct) (value interface{}, err error) {
+func (svs *serviceSkList) GetValue(key keystruct.KeyStruct) (value interface{}, err error) {
 	if mitem, ok := svs.Store.Search(key); ok {
 		if mitem.(*MemItem).Expire >= time.Now().Unix() {
 			mitem.(*MemItem).Expire = time.Now().Add(mitem.(*MemItem).duration).Unix()
@@ -48,7 +48,7 @@ func (svs *serviceRBtree) GetValue(key keystruct.KeyStruct) (value interface{}, 
 	return nil, errors.New("expire")
 }
 
-func (svs *serviceRBtree) SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration) {
+func (svs *serviceSkList) SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration) {
 	if mitem, ok := svs.Store.Search(key); ok {
 		mitem.(*MemItem).Expire = time.Now().Add(expire).Unix()
 		mitem.(*MemItem).Value = value
@@ -63,7 +63,7 @@ func (svs *serviceRBtree) SetValue(key keystruct.KeyStruct, value interface{}, e
 	svs.Store.InsertElement(key, &m)
 }
 
-func (svs *serviceRBtree) GetRange(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error) {
+func (svs *serviceSkList) GetRange(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error) {
 	//TODO
 	return
 }
