@@ -1,30 +1,41 @@
-package main
+package loopqueue
 
-import (
-	"fmt"
-	"time"
+const (
+	GET = iota
+	SET
+	RANGE
 )
 
+//support for log request
 type LoopQueue struct {
 	start  int
 	end    int
 	length int
 	name   string
-	data   []interface{}
+	data   []DataItem
 }
+
+type DataItem struct {
+	Commandtype int
+	Inner       interface{}
+	TimeStamp   int64
+}
+
+//for log system buffer
+var RingQueueService LoopQueue
 
 func (lq *LoopQueue) InitQueue(length int, name string) bool {
 	if nil == lq || length <= 0 {
 		return false
 	}
-	lq.data = make([]interface{}, length)
+	lq.data = make([]DataItem, length)
 	lq.length = length
 	lq.name = name
 	lq.start = 0
 	lq.end = 0
 	return true
 }
-func (lq *LoopQueue) Push(data interface{}) bool {
+func (lq *LoopQueue) Push(data DataItem) bool {
 	if nil == lq {
 		panic("LoopQueue is nil")
 	}
@@ -71,41 +82,4 @@ func (lq *LoopQueue) getStart() int {
 }
 func (lq *LoopQueue) getEnd() int {
 	return lq.end % lq.length
-}
-
-var Q LoopQueue
-
-func Create() {
-	var index int = 0
-	for {
-		ret := Q.Push(index)
-		if ret {
-			fmt.Println("PushOk", "index=", index)
-			index++
-		} else {
-			fmt.Println("PushError", "index=", index)
-		}
-		time.Sleep(1e9)
-	}
-}
-func Consum() {
-	for {
-		ret, data := Q.Pop()
-		if ret {
-			fmt.Println("PopSucc", "data=", data)
-		} else {
-			fmt.Println("PopError")
-		}
-		time.Sleep(1e9)
-	}
-}
-
-//实现环形队列
-func main() {
-	Q.InitQueue(10, "test")
-	go Create()
-	go Consum()
-	for {
-		time.Sleep(1e9)
-	}
 }

@@ -2,6 +2,7 @@ package store
 
 import (
 	keystruct "basic/zhenCache/innerDB/keystruct"
+	"errors"
 	"sync"
 	"time"
 )
@@ -36,6 +37,8 @@ type MemItem struct {
 
 var svs StoreService
 var dbonce sync.Once
+var setonce sync.Once
+var current_svs int = DefaultService
 
 func getService(service int) StoreService {
 	switch service {
@@ -51,22 +54,22 @@ func getService(service int) StoreService {
 }
 
 //GetValue GetValue
-func GetValue(key keystruct.KeyStruct, service int) (value interface{}, err error) {
-	return getService(service).GetValue(key)
+func GetValue(key keystruct.KeyStruct) (value interface{}, err error) {
+	return getService(current_svs).GetValue(key)
 }
 
 //SetValue SetValue
-func SetValue(key keystruct.KeyStruct, service int, value interface{}, expire time.Duration) {
-	getService(service).SetValue(key, value, expire)
+func SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration) {
+	getService(current_svs).SetValue(key, value, expire)
 }
 
-//GetValueDefault  with default
-func GetValueDefault(key keystruct.KeyStruct, getV func() interface{}) interface{} {
-	if val, err := GetValue(key, DefaultService); err == nil {
-		return val
+//Set Service, or it will be default
+func SetStoreService(service int) error {
+	setonce.Do(func() {
+		current_svs = service
+	})
+	if current_svs == service {
+		return nil
 	}
-
-	val := getV()
-	SetValue(key, DefaultService, val, time.Minute*3)
-	return val
+	return errors.New("already set")
 }
