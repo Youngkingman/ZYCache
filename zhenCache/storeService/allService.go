@@ -68,6 +68,7 @@ func GetValue(key keystruct.KeyStruct) (value interface{}, err error) {
 			Expire:      time.Duration(time.Now().Unix()),
 			TimeStamp:   time.Now().UnixNano(),
 		}
+		//GET operation won't change the KV state, so let it go
 		loopqueue.LogItemPush(logitem)
 	}
 	return getService(current_svs).GetValue(key)
@@ -75,6 +76,7 @@ func GetValue(key keystruct.KeyStruct) (value interface{}, err error) {
 
 //SetValue SetValue
 func SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration) {
+	has := true
 	if LOG_ENABLE {
 		//put current command into cache
 		logitem := loopqueue.DataItem{
@@ -84,9 +86,14 @@ func SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration) 
 			Expire:      expire,
 			TimeStamp:   time.Now().UnixNano(),
 		}
-		loopqueue.LogItemPush(logitem)
+		has = loopqueue.LogItemPush(logitem)
 	}
-	getService(current_svs).SetValue(key, value, expire)
+	if has {
+		getService(current_svs).SetValue(key, value, expire)
+	} else {
+		//handle fail insert
+	}
+
 }
 
 //Set Service, or it will be default

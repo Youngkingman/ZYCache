@@ -70,6 +70,7 @@ func (lq *LoopQueue) InitQueue(length int, name string) bool {
 	lq.end = 0
 	return true
 }
+
 func (lq *LoopQueue) push(data DataItem) bool {
 	if nil == lq {
 		panic("LoopQueue is nil")
@@ -82,6 +83,7 @@ func (lq *LoopQueue) push(data DataItem) bool {
 	lq.end = (end + 1) % lq.length
 	return true
 }
+
 func (lq *LoopQueue) pop() (bool, interface{}) {
 	if nil == lq {
 		panic("LoopQueue is nil")
@@ -94,6 +96,7 @@ func (lq *LoopQueue) pop() (bool, interface{}) {
 	lq.start = (start + 1) % lq.length
 	return true, startValue
 }
+
 func (lq *LoopQueue) isEmpty() bool {
 	if nil == lq {
 		panic("LoopQueue is nil")
@@ -103,6 +106,7 @@ func (lq *LoopQueue) isEmpty() bool {
 	}
 	return false
 }
+
 func (lq *LoopQueue) isFull() bool {
 	if nil == lq {
 		panic("LoopQueue is nil")
@@ -112,9 +116,11 @@ func (lq *LoopQueue) isFull() bool {
 	}
 	return false
 }
+
 func (lq *LoopQueue) getStart() int {
 	return lq.start % lq.length
 }
+
 func (lq *LoopQueue) getEnd() int {
 	return lq.end % lq.length
 }
