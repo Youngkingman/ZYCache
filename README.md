@@ -42,3 +42,9 @@
    //这个键会保持15分钟的缓存时间，过期后将无法获得
    store.Set(TestKey{keystruct.DefaultKey{},"test"},"value of testkey",15*time.Minute)
    ```
+
+预定的一些进阶功能：
+
+- 缓存持久化防止数据丢失
+- 客户端程序的引入
+- 提供分布式扩展支持
