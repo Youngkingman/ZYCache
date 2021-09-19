@@ -1,5 +1,11 @@
 package loopqueue
 
+import (
+	keystruct "basic/zhenCache/innerDB/keystruct"
+	"sync"
+	"time"
+)
+
 const (
 	GET = iota
 	SET
@@ -15,14 +21,43 @@ type LoopQueue struct {
 	data   []DataItem
 }
 
+//command log item
 type DataItem struct {
 	Commandtype int
-	Inner       interface{}
+	Key         keystruct.KeyStruct
+	Value       interface{}
+	Expire      time.Duration
 	TimeStamp   int64
 }
 
-//for log system buffer
-var RingQueueService LoopQueue
+//for log system buffer,private queue
+var ringQueueService LoopQueue
+var lqonce sync.Once
+
+//buffer area of queue
+const Q_LENGTH = 4096
+
+func LogItemPush(data DataItem) bool {
+	return getService().push(data)
+}
+
+func LogItemPop() (bool, interface{}) {
+	return getService().pop()
+}
+
+func getService() *LoopQueue {
+	lqonce.Do(func() {
+		q := LoopQueue{
+			start:  0,
+			end:    0,
+			length: Q_LENGTH,
+			name:   "log_buffer",
+			data:   make([]DataItem, Q_LENGTH),
+		}
+		ringQueueService = q
+	})
+	return &ringQueueService
+}
 
 func (lq *LoopQueue) InitQueue(length int, name string) bool {
 	if nil == lq || length <= 0 {
@@ -35,7 +70,7 @@ func (lq *LoopQueue) InitQueue(length int, name string) bool {
 	lq.end = 0
 	return true
 }
-func (lq *LoopQueue) Push(data DataItem) bool {
+func (lq *LoopQueue) push(data DataItem) bool {
 	if nil == lq {
 		panic("LoopQueue is nil")
 	}
@@ -47,7 +82,7 @@ func (lq *LoopQueue) Push(data DataItem) bool {
 	lq.end = (end + 1) % lq.length
 	return true
 }
-func (lq *LoopQueue) Pop() (bool, interface{}) {
+func (lq *LoopQueue) pop() (bool, interface{}) {
 	if nil == lq {
 		panic("LoopQueue is nil")
 	}

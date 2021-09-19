@@ -1,6 +1,7 @@
 package store
 
 import (
+	"basic/yinLog/loopqueue"
 	keystruct "basic/zhenCache/innerDB/keystruct"
 	"errors"
 	"sync"
@@ -21,6 +22,9 @@ const DefaultService = MAP
 
 //sklist level
 const SKListLevel = 16
+
+//logger flag
+const LOG_ENABLE = true
 
 //StoreService memservice
 type StoreService interface {
@@ -55,11 +59,33 @@ func getService(service int) StoreService {
 
 //GetValue GetValue
 func GetValue(key keystruct.KeyStruct) (value interface{}, err error) {
+	if LOG_ENABLE {
+		//put current command into cache
+		logitem := loopqueue.DataItem{
+			Commandtype: loopqueue.GET,
+			Key:         key,
+			Value:       nil,
+			Expire:      time.Duration(time.Now().Unix()),
+			TimeStamp:   time.Now().UnixNano(),
+		}
+		loopqueue.LogItemPush(logitem)
+	}
 	return getService(current_svs).GetValue(key)
 }
 
 //SetValue SetValue
 func SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration) {
+	if LOG_ENABLE {
+		//put current command into cache
+		logitem := loopqueue.DataItem{
+			Commandtype: loopqueue.SET,
+			Key:         key,
+			Value:       value,
+			Expire:      expire,
+			TimeStamp:   time.Now().UnixNano(),
+		}
+		loopqueue.LogItemPush(logitem)
+	}
 	getService(current_svs).SetValue(key, value, expire)
 }
 
