@@ -17,7 +17,7 @@ func getServiceMap() StoreService {
 	dbonce.Do(func() {
 		s := &serviceMap{
 			Store:  map[keystruct.KeyStruct]*MemItem{},
-			ticker: time.NewTicker(time.Minute * 10),
+			ticker: time.NewTicker(CHECK_EXPIRE_TIME),
 			keyRL:  new(sync.RWMutex),
 		}
 		svs = s

@@ -26,6 +26,10 @@ const SKListLevel = 16
 //logger flag
 const LOG_ENABLE = true
 
+//check expire time, may bring some unexpected effect
+//set this const carfully
+const CHECK_EXPIRE_TIME = 20 * time.Minute
+
 //StoreService memservice
 type StoreService interface {
 	GetValue(key keystruct.KeyStruct) (value interface{}, err error)

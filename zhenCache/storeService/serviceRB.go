@@ -16,7 +16,7 @@ func getServiceRBtree() StoreService {
 	dbonce.Do(func() {
 		s := &serviceRBtree{
 			Store:  rbtree.New(),
-			ticker: time.NewTicker(time.Minute * 60),
+			ticker: time.NewTicker(CHECK_EXPIRE_TIME),
 		}
 		svs = s
 		go func() {

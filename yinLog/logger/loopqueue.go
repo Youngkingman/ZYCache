@@ -1,4 +1,4 @@
-package loopqueue
+package logger
 
 import (
 	keystruct "basic/zhenCache/innerDB/keystruct"
@@ -23,30 +23,38 @@ type LoopQueue struct {
 
 //command log item
 type DataItem struct {
-	Commandtype int
-	Key         keystruct.KeyStruct
-	Value       interface{}
-	Expire      time.Duration
-	TimeStamp   int64
+	Commandtype int                 `json:"commandtype"`
+	Key         keystruct.KeyStruct `json:"key"`
+	Value       interface{}         `json:"value"`
+	Expire      time.Duration       `json:"duration"`
+	TimeStamp   int64               `json:"log_time"`
 }
 
 //for log system buffer,private queue
 var ringQueueService LoopQueue
+
+//init operation
 var lqonce sync.Once
 
 //buffer area of queue
 const Q_LENGTH = 4096
 
+//enable the service
+func init() {
+	getQueue()
+}
+
 func LogItemPush(data DataItem) bool {
-	return getService().push(data)
+	return getQueue().push(data)
 }
 
 func LogItemPop() (bool, interface{}) {
-	return getService().pop()
+	return getQueue().pop()
 }
 
-func getService() *LoopQueue {
+func getQueue() *LoopQueue {
 	lqonce.Do(func() {
+		go startLogServe()
 		q := LoopQueue{
 			start:  0,
 			end:    0,
@@ -70,6 +78,7 @@ func (lq *LoopQueue) InitQueue(length int, name string) bool {
 	lq.end = 0
 	return true
 }
+
 func (lq *LoopQueue) push(data DataItem) bool {
 	if nil == lq {
 		panic("LoopQueue is nil")
@@ -82,6 +91,7 @@ func (lq *LoopQueue) push(data DataItem) bool {
 	lq.end = (end + 1) % lq.length
 	return true
 }
+
 func (lq *LoopQueue) pop() (bool, interface{}) {
 	if nil == lq {
 		panic("LoopQueue is nil")
@@ -94,6 +104,7 @@ func (lq *LoopQueue) pop() (bool, interface{}) {
 	lq.start = (start + 1) % lq.length
 	return true, startValue
 }
+
 func (lq *LoopQueue) isEmpty() bool {
 	if nil == lq {
 		panic("LoopQueue is nil")
@@ -103,6 +114,7 @@ func (lq *LoopQueue) isEmpty() bool {
 	}
 	return false
 }
+
 func (lq *LoopQueue) isFull() bool {
 	if nil == lq {
 		panic("LoopQueue is nil")
@@ -112,9 +124,11 @@ func (lq *LoopQueue) isFull() bool {
 	}
 	return false
 }
+
 func (lq *LoopQueue) getStart() int {
 	return lq.start % lq.length
 }
+
 func (lq *LoopQueue) getEnd() int {
 	return lq.end % lq.length
 }

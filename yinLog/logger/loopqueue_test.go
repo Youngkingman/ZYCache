@@ -1,4 +1,4 @@
-package loopqueue
+package logger
 
 import (
 	keystruct "basic/zhenCache/innerDB/keystruct"

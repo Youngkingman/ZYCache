@@ -16,7 +16,7 @@ func getServiceSkList() StoreService {
 	dbonce.Do(func() {
 		s := &serviceSkList{
 			Store:  skiplist.New(SKListLevel),
-			ticker: time.NewTicker(time.Minute * 60),
+			ticker: time.NewTicker(CHECK_EXPIRE_TIME),
 		}
 		svs = s
 		go func() {
