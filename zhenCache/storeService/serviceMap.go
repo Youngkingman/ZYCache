@@ -1,6 +1,7 @@
 package store
 
 import (
+	"basic/yinLog/logger"
 	keystruct "basic/zhenCache/innerDB/keystruct"
 	"errors"
 	"sync"
@@ -17,11 +18,22 @@ func getServiceMap() StoreService {
 	dbonce.Do(func() {
 		s := &serviceMap{
 			Store:  map[keystruct.KeyStruct]*MemItem{},
-			ticker: time.NewTicker(time.Minute * 10),
+			ticker: time.NewTicker(CHECK_EXPIRE_TIME),
 			keyRL:  new(sync.RWMutex),
 		}
 		svs = s
 		go func() {
+			if LOG_ENABLE == true {
+				//to start the servise
+				logger.LogItemPush(logger.DataItem{
+					Commandtype: logger.INITMESSAGE,
+					Key:         keystruct.DefaultKey{},
+					Value:       nil,
+					Expire:      0,
+					TimeStamp:   time.Now().Unix(),
+				})
+				defer logger.ShutLog()
+			}
 			for {
 				select {
 				case <-s.ticker.C:

@@ -1,7 +1,7 @@
 package store
 
 import (
-	"basic/yinLog/loopqueue"
+	"basic/yinLog/logger"
 	keystruct "basic/zhenCache/innerDB/keystruct"
 	"errors"
 	"sync"
@@ -25,6 +25,10 @@ const SKListLevel = 16
 
 //logger flag
 const LOG_ENABLE = true
+
+//check expire time, may bring some unexpected effect
+//set this const carfully
+const CHECK_EXPIRE_TIME = 20 * time.Minute
 
 //StoreService memservice
 type StoreService interface {
@@ -61,37 +65,30 @@ func getService(service int) StoreService {
 func GetValue(key keystruct.KeyStruct) (value interface{}, err error) {
 	if LOG_ENABLE {
 		//put current command into cache
-		logitem := loopqueue.DataItem{
-			Commandtype: loopqueue.GET,
+		logitem := logger.DataItem{
+			Commandtype: logger.GET,
 			Key:         key,
 			Value:       nil,
-			Expire:      time.Duration(time.Now().Unix()),
+			Expire:      0,
 			TimeStamp:   time.Now().UnixNano(),
 		}
-		//GET operation won't change the KV state, so let it go
-		loopqueue.LogItemPush(logitem)
+		logger.LogItemPush(logitem)
 	}
 	return getService(current_svs).GetValue(key)
 }
 
 //SetValue SetValue
 func SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration) {
-	has := true
 	if LOG_ENABLE {
 		//put current command into cache
-		logitem := loopqueue.DataItem{
-			Commandtype: loopqueue.SET,
+		logitem := logger.DataItem{
+			Commandtype: logger.SET,
 			Key:         key,
 			Value:       value,
-			Expire:      expire,
+			Expire:      time.Now().Add(expire).Unix(),
 			TimeStamp:   time.Now().UnixNano(),
 		}
-		has = loopqueue.LogItemPush(logitem)
-	}
-	if has {
-		getService(current_svs).SetValue(key, value, expire)
-	} else {
-		//handle fail insert
+		logger.LogItemPush(logitem)
 	}
 
 }

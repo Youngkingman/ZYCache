@@ -1,6 +1,7 @@
 package store
 
 import (
+	"basic/yinLog/logger"
 	keystruct "basic/zhenCache/innerDB/keystruct"
 	skiplist "basic/zhenCache/innerDB/skipList"
 	"errors"
@@ -16,10 +17,21 @@ func getServiceSkList() StoreService {
 	dbonce.Do(func() {
 		s := &serviceSkList{
 			Store:  skiplist.New(SKListLevel),
-			ticker: time.NewTicker(time.Minute * 60),
+			ticker: time.NewTicker(CHECK_EXPIRE_TIME),
 		}
 		svs = s
 		go func() {
+			if LOG_ENABLE == true {
+				//to start the servise
+				logger.LogItemPush(logger.DataItem{
+					Commandtype: logger.INITMESSAGE,
+					Key:         keystruct.DefaultKey{},
+					Value:       nil,
+					Expire:      0,
+					TimeStamp:   time.Now().Unix(),
+				})
+				defer logger.ShutLog()
+			}
 			for {
 				select {
 				case <-s.ticker.C:

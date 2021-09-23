@@ -1,15 +1,15 @@
-package loopqueue
+package logger
 
 import (
 	keystruct "basic/zhenCache/innerDB/keystruct"
 	"sync"
-	"time"
 )
 
 const (
 	GET = iota
 	SET
 	RANGE
+	INITMESSAGE
 )
 
 //support for log request
@@ -23,32 +23,51 @@ type LoopQueue struct {
 
 //command log item
 type DataItem struct {
-	Commandtype int
-	Key         keystruct.KeyStruct
-	Value       interface{}
-	Expire      time.Duration
-	TimeStamp   int64
+	Commandtype int                 `json:"commandtype"`
+	Key         keystruct.KeyStruct `json:"key"`
+	Value       interface{}         `json:"value"`
+	Expire      int64               `json:"duration"`
+	TimeStamp   int64               `json:"log_time"`
 }
 
 //for log system buffer,private queue
 var ringQueueService LoopQueue
+
+//init operation
 var lqonce sync.Once
 
 //buffer area of queue
-const Q_LENGTH = 4096
+const Q_LENGTH = 32768
+
+//enable the service
+func init() {
+	getQueue()
+}
 
 //user interface for log push
 func LogItemPush(data DataItem) bool {
-	return getService().push(data)
+	return getQueue().push(data)
 }
 
 //user interface for log pop
 func LogItemPop() (bool, interface{}) {
-	return getService().pop()
+	return getQueue().pop()
 }
 
-func getService() *LoopQueue {
+//if you have ever used LogItemPush or LogItemPop
+//please make sure that you will call ShutLog() before
+//you close the servise
+var shutdown chan struct{}
+
+func ShutLog() {
+	shutdown = make(chan struct{})
+	lt.stop <- struct{}{}
+	<-shutdown
+}
+
+func getQueue() *LoopQueue {
 	lqonce.Do(func() {
+		go startLogServe()
 		q := LoopQueue{
 			start:  0,
 			end:    0,
