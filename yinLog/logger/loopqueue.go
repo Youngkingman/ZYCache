@@ -10,6 +10,7 @@ const (
 	GET = iota
 	SET
 	RANGE
+	INITMESSAGE
 )
 
 //support for log request
@@ -37,7 +38,7 @@ var ringQueueService LoopQueue
 var lqonce sync.Once
 
 //buffer area of queue
-const Q_LENGTH = 4096
+const Q_LENGTH = 32768
 
 //enable the service
 func init() {
@@ -50,6 +51,17 @@ func LogItemPush(data DataItem) bool {
 
 func LogItemPop() (bool, interface{}) {
 	return getQueue().pop()
+}
+
+//if you have ever used LogItemPush or LogItemPop
+//please make sure that you will call ShutLog() before
+//you close the servise
+var shutdown chan struct{}
+
+func ShutLog() {
+	shutdown = make(chan struct{})
+	lt.stop <- struct{}{}
+	<-shutdown
 }
 
 func getQueue() *LoopQueue {

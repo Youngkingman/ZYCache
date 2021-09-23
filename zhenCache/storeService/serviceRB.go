@@ -1,6 +1,7 @@
 package store
 
 import (
+	"basic/yinLog/logger"
 	keystruct "basic/zhenCache/innerDB/keystruct"
 	"basic/zhenCache/innerDB/rbtree"
 	"errors"
@@ -20,6 +21,17 @@ func getServiceRBtree() StoreService {
 		}
 		svs = s
 		go func() {
+			if LOG_ENABLE == true {
+				//to start the servise
+				logger.LogItemPush(logger.DataItem{
+					Commandtype: logger.INITMESSAGE,
+					Key:         keystruct.DefaultKey{},
+					Value:       nil,
+					Expire:      time.Microsecond,
+					TimeStamp:   time.Now().Unix(),
+				})
+				defer logger.ShutLog()
+			}
 			for {
 				select {
 				case <-s.ticker.C:
