@@ -69,7 +69,7 @@ func GetValue(key keystruct.KeyStruct) (value interface{}, err error) {
 			Commandtype: logger.GET,
 			Key:         key,
 			Value:       nil,
-			Expire:      time.Duration(time.Now().Unix()),
+			Expire:      0,
 			TimeStamp:   time.Now().UnixNano(),
 		}
 		logger.LogItemPush(logitem)
@@ -85,7 +85,7 @@ func SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration) 
 			Commandtype: logger.SET,
 			Key:         key,
 			Value:       value,
-			Expire:      expire,
+			Expire:      time.Now().Add(expire).Unix(),
 			TimeStamp:   time.Now().UnixNano(),
 		}
 		logger.LogItemPush(logitem)

@@ -12,8 +12,8 @@ type logTimer struct {
 	stop   chan struct{}
 }
 
-//every hour create a new log file
-const LOG_SPLIT_TIME = time.Hour
+//bring IO presure every LOG_SPLIT_TIME, be carefully set
+const LOG_SPLIT_TIME = 15 * time.Minute
 
 var lt logTimer
 

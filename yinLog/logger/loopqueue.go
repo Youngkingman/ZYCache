@@ -3,7 +3,6 @@ package logger
 import (
 	keystruct "basic/zhenCache/innerDB/keystruct"
 	"sync"
-	"time"
 )
 
 const (
@@ -27,7 +26,7 @@ type DataItem struct {
 	Commandtype int                 `json:"commandtype"`
 	Key         keystruct.KeyStruct `json:"key"`
 	Value       interface{}         `json:"value"`
-	Expire      time.Duration       `json:"duration"`
+	Expire      int64               `json:"duration"`
 	TimeStamp   int64               `json:"log_time"`
 }
 

@@ -27,7 +27,7 @@ func getServiceRBtree() StoreService {
 					Commandtype: logger.INITMESSAGE,
 					Key:         keystruct.DefaultKey{},
 					Value:       nil,
-					Expire:      time.Microsecond,
+					Expire:      0,
 					TimeStamp:   time.Now().Unix(),
 				})
 				defer logger.ShutLog()
