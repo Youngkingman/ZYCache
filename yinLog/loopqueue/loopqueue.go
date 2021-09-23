@@ -37,10 +37,12 @@ var lqonce sync.Once
 //buffer area of queue
 const Q_LENGTH = 4096
 
+//user interface for log push
 func LogItemPush(data DataItem) bool {
 	return getService().push(data)
 }
 
+//user interface for log pop
 func LogItemPop() (bool, interface{}) {
 	return getService().pop()
 }
