@@ -1,4 +1,4 @@
-# ZYCache : An Ordered-Set K-V memory cache service
+# ZYCache : An Ordered-Set K-V Memory Cache Service
 
 震寅Cache是一个轻量级的内存缓存服务，提供类似于Go2.0提案中的参数列表化泛型支持的KeyStruct类型索引以及定时缓存键值对功能。震寅Cache分为两个主要部分，ZhenCache用于提供缓存服务，功能目前基本完善；YinLog目前是一个日志系统，采用无锁队列进行日志缓存服务，记录所有的数据集查询以及添加操作，后续会为缓存持久化提供支持。
 
@@ -47,6 +47,7 @@
 
 - 缓存持久化防止数据丢失
 - 客户端程序的引入
+<<<<<<< HEAD
 - 提供分布式扩展支持
 
 9/24 更新

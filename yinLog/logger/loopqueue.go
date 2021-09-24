@@ -44,10 +44,12 @@ func init() {
 	getQueue()
 }
 
+//user interface for log push
 func LogItemPush(data DataItem) bool {
 	return getQueue().push(data)
 }
 
+//user interface for log pop
 func LogItemPop() (bool, interface{}) {
 	return getQueue().pop()
 }
