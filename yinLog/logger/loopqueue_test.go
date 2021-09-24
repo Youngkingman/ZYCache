@@ -9,7 +9,7 @@ import (
 
 var wg sync.WaitGroup
 
-const MAX_TEST_COUNT = Q_LENGTH / 100
+const MAX_TEST_COUNT = Q_LENGTH
 
 func Test_ConcurrenyOperation(t *testing.T) {
 	wg.Add(1)
@@ -20,5 +20,6 @@ func Test_ConcurrenyOperation(t *testing.T) {
 		wg.Done()
 	}()
 	wg.Wait()
+	time.Sleep(10 * time.Second)
 	ShutLog()
 }
