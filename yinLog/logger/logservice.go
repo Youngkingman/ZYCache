@@ -20,7 +20,7 @@ const LOG_SPLIT_COUNT = 1024 * 1024
 
 var lt logTimer
 
-func startLogServe() {
+func startLogAppendServe() {
 	lt = logTimer{
 		ticker: time.NewTicker(LOG_SPLIT_TIME),
 		stop:   make(chan struct{}),
@@ -89,5 +89,19 @@ func jsonWrite(ofile *os.File, item interface{}) {
 	}
 	if _, err := ofile.Write(itemJson); err != nil {
 		panic(err)
+	}
+}
+
+//currently can be used for map, but not RBTree & SkipList
+func RdbLog(items []DataItem) {
+	oname := fmt.Sprintf("rdb_copy_%d.zyl",
+		time.Now().UnixNano())
+	ofile, err := os.Create("../logbin/" + oname)
+	if err != nil {
+		panic(err)
+	}
+	defer ofile.Close()
+	for _, item := range items {
+		jsonWrite(ofile, item)
 	}
 }

@@ -39,13 +39,23 @@ func getServiceMap() StoreService {
 				case <-s.ticker.C:
 					now := time.Now().Unix()
 					needDeletedKey := []keystruct.KeyStruct{}
+					loggerItems := make([]logger.DataItem, 0)
 					s.keyRL.RLock()
 					for key, mItem := range s.Store {
 						if mItem.Expire < now {
 							needDeletedKey = append(needDeletedKey, key)
+							loggerItems = append(loggerItems, logger.DataItem{
+								Commandtype: logger.SET,
+								Key:         key,
+								Value:       mItem.Value,
+								Expire:      mItem.Expire,
+								TimeStamp:   now,
+							})
 						}
 					}
 					s.keyRL.RUnlock()
+
+					go logger.RdbLog(loggerItems)
 
 					s.keyRL.Lock()
 					for _, key := range needDeletedKey {
