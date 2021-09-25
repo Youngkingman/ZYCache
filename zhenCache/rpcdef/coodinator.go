@@ -37,7 +37,7 @@ func (c *Coordinator) Get(args *StoreArgs, reply *StoreReply) error {
 	return nil
 }
 
-func (c *Coordinator) server() {
+func (c *Coordinator) Serve() {
 	rpc.Register(c)
 	rpc.HandleHTTP()
 	l, e := net.Listen("tcp", ":1234")

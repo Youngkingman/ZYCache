@@ -25,7 +25,8 @@ func call(rpcname string, args interface{}, reply interface{}) bool {
 	return false
 }
 
-func Get(key keystruct.KeyStruct) (error, interface{}) {
+//get some value by cli
+func Get(key keystruct.KeyStruct) (interface{}, error) {
 	args := StoreArgs{
 		Command: GET,
 		Key:     key,
@@ -34,11 +35,12 @@ func Get(key keystruct.KeyStruct) (error, interface{}) {
 	reply := StoreReply{}
 	call("Coordinator.Get", &args, &reply)
 	if reply.Reply == SUCCESS {
-		return nil, reply.Value
+		return reply.Value, nil
 	}
-	return errors.New("key not found"), nil
+	return nil, errors.New("key not found")
 }
 
+//set some value by cli
 func Set(key keystruct.KeyStruct, value interface{}, expire time.Duration) error {
 	args := StoreArgs{
 		Command: SET,
