@@ -67,7 +67,7 @@ func ShutLog() {
 
 func getQueue() *LoopQueue {
 	lqonce.Do(func() {
-		go startLogServe()
+		go startLogAppendServe()
 		q := LoopQueue{
 			start:  0,
 			end:    0,

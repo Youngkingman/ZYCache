@@ -56,5 +56,10 @@ func Recover(files []string) {
 			}
 		}
 	}
+}
+
+//useful log means the current rdb log & the latter aof log
+//TODO
+func PicUsefulLog() {
 
 }

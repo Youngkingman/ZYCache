@@ -1,26 +1,21 @@
 package main
 
-const MAX_TEST_COUNT = 2000
+import (
+	keystruct "basic/zhenCache/innerDB/keystruct"
+	"basic/zhenCache/rpcdef"
+	store "basic/zhenCache/storeService"
+	"fmt"
+)
 
 func main() {
-	// var wg sync.WaitGroup
-	// wg.Add(2)
-	// go func() {
-	// 	for i := 0; i < MAX_TEST_COUNT; i++ {
-	// 		loopqueue.LogItemPush(loopqueue.DataItem{loopqueue.GET, keystruct.DefaultKey{}, i, time.Now().UnixNano()})
-	// 	}
-	// 	wg.Done()
-	// }()
-
-	// go func() {
-	// 	for i := 0; i < MAX_TEST_COUNT; i++ {
-	// 		has, item := loopqueue.LogItemPop()
-	// 		fmt.Println(has, item)
-	// 	}
-	// 	wg.Done()
-	// }()
-
-	// wg.Wait()
-	// has, item := loopqueue.LogItemPop()
-	// fmt.Println(has, item, "ending")
+	//server code
+	cood := rpcdef.Coordinator{}
+	go cood.Serve()
+	//client code
+	for i := 0; i < 10000; i++ {
+		key := keystruct.DefaultKey{}
+		rpcdef.Set(key, i, store.DefaultDuration)
+	}
+	val, err := rpcdef.Get(keystruct.DefaultKey{})
+	fmt.Print(val, err)
 }
