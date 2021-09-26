@@ -89,7 +89,7 @@ func SetValue(key string, value interface{}, expire time.Duration) {
 		}
 		logger.LogItemPush(logitem)
 	}
-
+	getService(current_svs).SetValue(key, value, expire)
 }
 
 //Set Service, or it will be default

@@ -2,7 +2,6 @@ package store
 
 import (
 	"basic/yinLog/logger"
-	keystruct "basic/zhenCache/innerDB/keystruct"
 	skiplist "basic/zhenCache/innerDB/skipList"
 	"errors"
 	"time"
@@ -75,7 +74,7 @@ func (svs *serviceSkList) SetValue(key string, value interface{}, expire time.Du
 	svs.Store.InsertElement(key, &m)
 }
 
-func (svs *serviceSkList) GetRange(keyL string, keyH keystruct.KeyStruct) (values []interface{}, err error) {
-	//TODO
-	return
-}
+// func (svs *serviceSkList) GetRange(keyL string, keyH keystruct.KeyStruct) (values []interface{}, err error) {
+// 	//TODO
+// 	return
+// }

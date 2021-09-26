@@ -2,7 +2,6 @@ package store
 
 import (
 	"basic/yinLog/logger"
-	keystruct "basic/zhenCache/innerDB/keystruct"
 	"basic/zhenCache/innerDB/rbtree"
 	"errors"
 	"time"
@@ -75,7 +74,7 @@ func (svs *serviceRBtree) SetValue(key string, value interface{}, expire time.Du
 	svs.Store.InsertElement(key, &m)
 }
 
-func (svs *serviceRBtree) GetRange(keyL string, keyH keystruct.KeyStruct) (values []interface{}, err error) {
-	//TODO
-	return
-}
+// func (svs *serviceRBtree) GetRange(keyL string, keyH keystruct.KeyStruct) (values []interface{}, err error) {
+// 	//TODO
+// 	return
+// }
