@@ -33,11 +33,12 @@ func startLogAppendServe() {
 	oname := fmt.Sprintf("zy_log_out_%dt_%d.zyl", log_id,
 		time.Now().UnixNano())
 	ofile, err := os.Create("yinLog/logbin/" + oname)
-	defer ofile.Close()
 
 	if err != nil {
 		panic("can't create log file, check your authority")
 	}
+	defer ofile.Close()
+
 	for {
 		//update the file and create a new one
 		select {

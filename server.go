@@ -1,14 +1,11 @@
 package main
 
-import (
-	store "basic/zhenCache/storeService"
-	"fmt"
-)
+import "basic/zhenCache/rpcdef"
 
 func main() {
 	//server code
-	// cood := new(rpcdef.Coordinator)
-	// cood.CoodinatorServe()
+	cood := new(rpcdef.Coordinator)
+	cood.CoodinatorServe()
 	// // //client code
 	// // // for i := 0; i < 5; i++ {
 	// // // 	key := TestKey{keystruct.DefaultKey{}, "fuck you"}
@@ -16,10 +13,6 @@ func main() {
 	// // // }
 	// // // val, err := rpcdef.Get(keystruct.DefaultKey{})
 	// // // fmt.Print(val, err)
-	// for {
-	// }
-	key1 := "fuck"
-	store.SetValue(key1, "fddddddd", store.DefaultDuration)
-	val, err := store.GetValue("fuck")
-	fmt.Println(val, err)
+	for {
+	}
 }
