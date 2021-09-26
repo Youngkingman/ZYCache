@@ -9,7 +9,7 @@ import (
 )
 
 type serviceMap struct {
-	Store  map[keystruct.KeyStruct]*MemItem
+	Store  map[string]*MemItem
 	ticker *time.Ticker
 	keyRL  *sync.RWMutex //for default map is concurrency unsafe
 }
@@ -17,7 +17,7 @@ type serviceMap struct {
 func getServiceMap() StoreService {
 	dbonce.Do(func() {
 		s := &serviceMap{
-			Store:  map[keystruct.KeyStruct]*MemItem{},
+			Store:  map[string]*MemItem{},
 			ticker: time.NewTicker(CHECK_EXPIRE_TIME),
 			keyRL:  new(sync.RWMutex),
 		}
@@ -27,7 +27,7 @@ func getServiceMap() StoreService {
 				//to start the servise
 				logger.LogItemPush(logger.DataItem{
 					Commandtype: logger.INITMESSAGE,
-					Key:         keystruct.DefaultKey{},
+					Key:         "",
 					Value:       nil,
 					Expire:      0,
 					TimeStamp:   time.Now().Unix(),
@@ -38,7 +38,7 @@ func getServiceMap() StoreService {
 				select {
 				case <-s.ticker.C:
 					now := time.Now().Unix()
-					needDeletedKey := []keystruct.KeyStruct{}
+					needDeletedKey := []string{}
 					loggerItems := make([]logger.DataItem, 0)
 					s.keyRL.RLock()
 					for key, mItem := range s.Store {
@@ -69,7 +69,7 @@ func getServiceMap() StoreService {
 	return svs
 }
 
-func (svs *serviceMap) GetValue(key keystruct.KeyStruct) (value interface{}, err error) {
+func (svs *serviceMap) GetValue(key string) (value interface{}, err error) {
 	defer svs.keyRL.RUnlock()
 	svs.keyRL.RLock()
 	if mitem, ok := svs.Store[key]; ok {
@@ -82,7 +82,7 @@ func (svs *serviceMap) GetValue(key keystruct.KeyStruct) (value interface{}, err
 	return nil, errors.New("no value")
 }
 
-func (svs *serviceMap) SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration) {
+func (svs *serviceMap) SetValue(key string, value interface{}, expire time.Duration) {
 	defer svs.keyRL.Unlock()
 	svs.keyRL.Lock()
 	if mitem, ok := svs.Store[key]; ok {
@@ -99,6 +99,6 @@ func (svs *serviceMap) SetValue(key keystruct.KeyStruct, value interface{}, expi
 	svs.Store[key] = &m
 }
 
-func (svs *serviceMap) GetRange(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error) {
+func (svs *serviceMap) GetRange(keyL string, keyH keystruct.KeyStruct) (values []interface{}, err error) {
 	return nil, errors.New("no support for unordered map")
 }

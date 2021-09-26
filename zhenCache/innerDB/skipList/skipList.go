@@ -1,7 +1,6 @@
 package skiplist
 
 import (
-	keystruct "basic/zhenCache/innerDB/keystruct"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -16,7 +15,7 @@ import (
 //basic element for skiplist
 type skipListNode struct {
 	level       int
-	key         keystruct.KeyStruct
+	key         string
 	item        interface{}
 	ForwardList []*skipListNode
 }
@@ -29,7 +28,7 @@ func (node *skipListNode) getItem() interface{} {
 	return node.item
 }
 
-func (node *skipListNode) getKey() keystruct.KeyStruct {
+func (node *skipListNode) getKey() string {
 	return node.key
 }
 
@@ -59,7 +58,7 @@ func (skList *SkipList) getRamdomLevel() (ret int) {
 }
 
 //node initialize function
-func (skList *SkipList) createNode(key keystruct.KeyStruct, item interface{}, level int) *skipListNode {
+func (skList *SkipList) createNode(key string, item interface{}, level int) *skipListNode {
 	ret := skipListNode{
 		level:       level,
 		key:         key,
@@ -70,7 +69,7 @@ func (skList *SkipList) createNode(key keystruct.KeyStruct, item interface{}, le
 }
 
 //if the key already exists, return -1, else insert the node
-func (skList *SkipList) InsertElement(key keystruct.KeyStruct, item interface{}) int {
+func (skList *SkipList) InsertElement(key string, item interface{}) int {
 	skList.mtx.Lock()
 	current := skList.head
 	update := make([]*skipListNode, skList.levelMax+1)
@@ -79,7 +78,7 @@ func (skList *SkipList) InsertElement(key keystruct.KeyStruct, item interface{})
 		//simple change the latter into
 		//"current.ForwardList[i].GetKey.CompareBiggerThan(key)"
 		//can change the order
-		for current.ForwardList[i] != nil && key.CompareBiggerThan(current.ForwardList[i].getKey()) {
+		for current.ForwardList[i] != nil && key > current.ForwardList[i].getKey() {
 			current = current.ForwardList[i]
 		}
 		update[i] = current
@@ -118,7 +117,7 @@ func (skList *SkipList) InsertElement(key keystruct.KeyStruct, item interface{})
 }
 
 //if the key already exists, change the itemue, else insert the node
-func (skList *SkipList) UpdateDuplicateKey(key keystruct.KeyStruct, item interface{}) {
+func (skList *SkipList) UpdateDuplicateKey(key string, item interface{}) {
 	skList.mtx.Lock()
 	current := skList.head
 	update := make([]*skipListNode, skList.levelMax+1)
@@ -127,7 +126,7 @@ func (skList *SkipList) UpdateDuplicateKey(key keystruct.KeyStruct, item interfa
 		//simple change the latter into
 		//"current.ForwardList[i].GetKey.compareBiggerThan(key)"
 		//can change the order
-		for current.ForwardList[i] != nil && key.CompareBiggerThan(current.ForwardList[i].getKey()) {
+		for current.ForwardList[i] != nil && key > current.ForwardList[i].getKey() {
 			current = current.ForwardList[i]
 		}
 		update[i] = current
@@ -167,14 +166,14 @@ func (skList *SkipList) UpdateDuplicateKey(key keystruct.KeyStruct, item interfa
 }
 
 //with given key, return if the key exists
-func (skList *SkipList) Search(key keystruct.KeyStruct) (interface{}, bool) {
+func (skList *SkipList) Search(key string) (interface{}, bool) {
 	skList.mtx.RLock()
 	current := skList.head
 	for i := skList.currentLevel; i >= 0; i-- {
 		//simple change the latter into
 		//"current.ForwardList[i].GetKey.compareBiggerThan(key)"
 		//can change the order
-		for current.ForwardList[i] != nil && key.CompareBiggerThan(current.ForwardList[i].getKey()) {
+		for current.ForwardList[i] != nil && key > current.ForwardList[i].getKey() {
 			current = current.ForwardList[i]
 		}
 	}
@@ -190,7 +189,7 @@ func (skList *SkipList) Search(key keystruct.KeyStruct) (interface{}, bool) {
 	return nil, false
 }
 
-func (skList *SkipList) Delete(key keystruct.KeyStruct) error {
+func (skList *SkipList) Delete(key string) error {
 	skList.mtx.Lock()
 	current := skList.head
 	update := make([]*skipListNode, skList.levelMax+1)
@@ -199,7 +198,7 @@ func (skList *SkipList) Delete(key keystruct.KeyStruct) error {
 		//simple change the latter into
 		//"current.ForwardList[i].GetKey.compareBiggerThan(key)"
 		//can change the order
-		for current.ForwardList[i] != nil && key.CompareBiggerThan(current.ForwardList[i].getKey()) {
+		for current.ForwardList[i] != nil && key > current.ForwardList[i].getKey() {
 			current = current.ForwardList[i]
 		}
 		update[i] = current
@@ -246,7 +245,7 @@ func (skList *SkipList) Show() {
 //contructor of the SkipList
 func New(maxLevel int) (ret SkipList) {
 	ret = SkipList{
-		head:         ret.createNode(nil, "I am the head", maxLevel),
+		head:         ret.createNode("", "I am the head", maxLevel),
 		tail:         nil,
 		elementCount: 0,
 		currentLevel: 0,
@@ -257,7 +256,7 @@ func New(maxLevel int) (ret SkipList) {
 }
 
 //return top n elements
-func (skList *SkipList) TopN(count int) (keys []keystruct.KeyStruct, items []interface{}) {
+func (skList *SkipList) TopN(count int) (keys []string, items []interface{}) {
 	if count < skList.elementCount {
 		for i := 0; i < skList.currentLevel; i++ {
 			current := skList.head.ForwardList[i]
@@ -283,7 +282,7 @@ func (skList *SkipList) TopN(count int) (keys []keystruct.KeyStruct, items []int
 	return
 }
 
-func (skList *SkipList) Range(condition func(interface{}) bool) (keys []keystruct.KeyStruct) {
+func (skList *SkipList) Range(condition func(interface{}) bool) (keys []string) {
 	skList.mtx.RLock()
 	for i := 0; i <= skList.currentLevel; i++ {
 		node := skList.head.ForwardList[i]

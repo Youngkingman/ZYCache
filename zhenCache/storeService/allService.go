@@ -2,7 +2,6 @@ package store
 
 import (
 	"basic/yinLog/logger"
-	keystruct "basic/zhenCache/innerDB/keystruct"
 	"errors"
 	"sync"
 	"time"
@@ -32,9 +31,9 @@ const CHECK_EXPIRE_TIME = 20 * time.Minute
 
 //StoreService memservice
 type StoreService interface {
-	GetValue(key keystruct.KeyStruct) (value interface{}, err error)
-	SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration)
-	GetRange(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error)
+	GetValue(key string) (value interface{}, err error)
+	SetValue(key string, value interface{}, expire time.Duration)
+	//GetRange(keyL string, keyH keystruct.KeyStruct) (values []interface{}, err error)
 }
 
 type MemItem struct {
@@ -62,7 +61,7 @@ func getService(service int) StoreService {
 }
 
 //GetValue GetValue
-func GetValue(key keystruct.KeyStruct) (value interface{}, err error) {
+func GetValue(key string) (value interface{}, err error) {
 	if LOG_ENABLE {
 		//put current command into cache
 		logitem := logger.DataItem{
@@ -78,7 +77,7 @@ func GetValue(key keystruct.KeyStruct) (value interface{}, err error) {
 }
 
 //SetValue SetValue
-func SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration) {
+func SetValue(key string, value interface{}, expire time.Duration) {
 	if LOG_ENABLE {
 		//put current command into cache
 		logitem := logger.DataItem{

@@ -1,26 +1,11 @@
 package rbtree
 
 import (
-	keystruct "basic/zhenCache/innerDB/keystruct"
 	"math/rand"
 	"sync"
 	"testing"
 	"time"
 )
-
-//Implement of SlistKey
-type IntTestKey struct {
-	keystruct.DefaultKey
-	key int
-}
-
-func (key IntTestKey) CompareBiggerThan(other keystruct.KeyStruct) bool {
-	return key.key > other.KeyInt32()
-}
-
-func (key IntTestKey) KeyInt32() int {
-	return key.key
-}
 
 var wg sync.WaitGroup
 var rbt RBTree
@@ -34,8 +19,8 @@ func Test_ConcurrenyOperation(t *testing.T) {
 	wg.Add(4)
 	go func() {
 		for i := 0; i < MAX_OPERATION; i++ {
-			key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
-			key1 := IntTestKey{keystruct.DefaultKey{}, i}
+			key := string(rune(int(rand.Uint32())))
+			key1 := string(rune(i))
 			rbt.InsertElement(key, "fuck you")
 			rbt.InsertElement(key1, "FUCK YOU")
 		}
@@ -44,7 +29,7 @@ func Test_ConcurrenyOperation(t *testing.T) {
 
 	go func() {
 		for i := 0; i < MAX_OPERATION; i++ {
-			key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
+			key := string(rune(int(rand.Uint32())))
 			//keySlice[i] = key
 			rbt.UpdateDuplicateKey(key, "fuck you")
 		}
@@ -53,7 +38,7 @@ func Test_ConcurrenyOperation(t *testing.T) {
 
 	go func() {
 		for i := 0; i < MAX_OPERATION; i++ {
-			key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
+			key := string(rune(int(rand.Uint32())))
 			rbt.Search(key)
 		}
 		wg.Done()
@@ -61,7 +46,7 @@ func Test_ConcurrenyOperation(t *testing.T) {
 
 	go func() {
 		for i := 0; i < MAX_OPERATION; i++ {
-			key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
+			key := string(rune(int(rand.Uint32())))
 			rbt.Delete(key)
 		}
 		wg.Done()
@@ -73,18 +58,18 @@ func Test_ConcurrenyOperation(t *testing.T) {
 func Test_BasciFunctionTest(t *testing.T) {
 	rbt = New()
 	rand.Seed(time.Now().UnixNano())
-	keySlice := make([]IntTestKey, MAX_OPERATION)
+	keySlice := make([]string, MAX_OPERATION)
 	for i := 0; i < MAX_OPERATION; i++ {
-		key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
+		key := string(rune(int(rand.Uint32())))
 		rbt.InsertElement(key, "fuck you")
 	}
 	for i := 0; i < MAX_OPERATION; i++ {
-		key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
+		key := string(rune(int(rand.Uint32())))
 		keySlice[i] = key
 		rbt.UpdateDuplicateKey(key, "fuck you")
 	}
 	for i := 0; i < MAX_OPERATION; i++ {
-		key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
+		key := string(rune(int(rand.Uint32())))
 		rbt.Search(key)
 	}
 	for i := MAX_OPERATION - 1; i >= MAX_OPERATION/2; i-- {

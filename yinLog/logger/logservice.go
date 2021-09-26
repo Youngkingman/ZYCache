@@ -32,7 +32,7 @@ func startLogAppendServe() {
 
 	oname := fmt.Sprintf("zy_log_out_%dt_%d.zyl", log_id,
 		time.Now().UnixNano())
-	ofile, err := os.Create("../logbin/" + oname)
+	ofile, err := os.Create("yinLog/logbin/" + oname)
 	defer ofile.Close()
 
 	if err != nil {
@@ -73,7 +73,7 @@ func splitFile(ofile *os.File, log_id int) *os.File {
 	ofile.Close()
 	oname := fmt.Sprintf("zy_log_out_%dt_%d.zyl", log_id,
 		time.Now().UnixNano())
-	newofile, err := os.Create("../logbin/" + oname)
+	newofile, err := os.Create("yinLog/logbin/" + oname)
 	if err != nil {
 		panic("can't create log file, check your authority")
 	}

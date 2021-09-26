@@ -1,7 +1,6 @@
 package rpcdef
 
 import (
-	"basic/zhenCache/innerDB/keystruct"
 	"errors"
 	"fmt"
 	"log"
@@ -26,22 +25,22 @@ func call(rpcname string, args interface{}, reply interface{}) bool {
 }
 
 //get some value by cli
-func Get(key keystruct.KeyStruct) (interface{}, error) {
+func Get(key string) (string, error) {
 	args := StoreArgs{
 		Command: GET,
 		Key:     key,
-		Value:   nil,
+		Value:   "",
 	}
 	reply := StoreReply{}
-	call("Coordinator.Get", &args, &reply)
+	call("Coordinator.GetVal", &args, &reply)
 	if reply.Reply == SUCCESS {
 		return reply.Value, nil
 	}
-	return nil, errors.New("key not found")
+	return "", errors.New("key not found")
 }
 
 //set some value by cli
-func Set(key keystruct.KeyStruct, value interface{}, expire time.Duration) error {
+func Set(key string, value string, expire time.Duration) error {
 	args := StoreArgs{
 		Command: SET,
 		Key:     key,
@@ -49,9 +48,27 @@ func Set(key keystruct.KeyStruct, value interface{}, expire time.Duration) error
 		Expire:  expire,
 	}
 	reply := StoreReply{}
-	call("Coordinator.Set", &args, &reply)
+	call("Coordinator.SetVal", &args, &reply)
 	if reply.Reply == SUCCESS {
 		return nil
 	}
 	return errors.New("set fail")
+}
+
+func CallExample() {
+
+	// declare an argument structure.
+	args := ExampleArgs{}
+
+	// fill in the argument(s).
+	args.X = 99
+
+	// declare a reply structure.
+	reply := ExampleReply{}
+
+	// send the RPC request, wait for the reply.
+	call("Coordinator.Example", &args, &reply)
+
+	// reply.Y should be 100.
+	fmt.Printf("reply.Y %v\n", reply.Y)
 }

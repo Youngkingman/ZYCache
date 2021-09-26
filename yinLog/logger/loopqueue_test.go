@@ -1,7 +1,6 @@
 package logger
 
 import (
-	keystruct "basic/zhenCache/innerDB/keystruct"
 	"sync"
 	"testing"
 	"time"
@@ -15,7 +14,7 @@ func Test_ConcurrenyOperation(t *testing.T) {
 	wg.Add(1)
 	go func() {
 		for i := 0; i < MAX_TEST_COUNT; i++ {
-			LogItemPush(DataItem{GET, keystruct.DefaultKey{}, i, 0, time.Now().Unix()})
+			LogItemPush(DataItem{GET, "", i, 0, time.Now().Unix()})
 		}
 		wg.Done()
 	}()

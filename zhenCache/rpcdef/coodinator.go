@@ -2,27 +2,28 @@ package rpcdef
 
 import (
 	store "basic/zhenCache/storeService"
+	"encoding/json"
 	"errors"
 	"log"
 	"net"
 	"net/http"
 	"net/rpc"
-	"time"
 )
 
 type Coordinator struct{}
 
-func (c *Coordinator) Set(args *StoreArgs, reply *StoreReply, expire time.Duration) error {
+func (c *Coordinator) SetVal(args *StoreArgs, reply *StoreReply) error {
 	if args.Command != SET {
 		reply.Reply = FAIL
 		return errors.New("WRONG COMMAND")
 	}
-	store.SetValue(args.Key, args.Value, expire)
+	//currently only
+	store.SetValue(args.Key, args.Value, args.Expire)
 	reply.Reply = SUCCESS
 	return nil
 }
 
-func (c *Coordinator) Get(args *StoreArgs, reply *StoreReply) error {
+func (c *Coordinator) GetVal(args *StoreArgs, reply *StoreReply) error {
 	if args.Command != GET {
 		reply.Reply = FAIL
 		return errors.New("WRONG COMMAND")
@@ -32,12 +33,18 @@ func (c *Coordinator) Get(args *StoreArgs, reply *StoreReply) error {
 		reply.Reply = FAIL
 		return errors.New("NO KEY")
 	}
+	//encode json for value
+	replySeq, err := json.Marshal(val)
+	if err != nil {
+		reply.Reply = FAIL
+		return errors.New("json unmarshal failed")
+	}
 	reply.Reply = SUCCESS
-	reply.Value = val
+	reply.Value = string(replySeq)
 	return nil
 }
 
-func (c *Coordinator) Serve() {
+func (c *Coordinator) CoodinatorServe() {
 	rpc.Register(c)
 	rpc.HandleHTTP()
 	l, e := net.Listen("tcp", ":1234")
@@ -46,4 +53,10 @@ func (c *Coordinator) Serve() {
 		log.Fatal("listen error:", e)
 	}
 	go http.Serve(l, nil)
+}
+
+//some example
+func (c *Coordinator) Example(args *ExampleArgs, reply *ExampleReply) error {
+	reply.Y = args.X + 1
+	return nil
 }
