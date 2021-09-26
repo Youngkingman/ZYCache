@@ -2,7 +2,6 @@ package rpcdef
 
 import (
 	store "basic/zhenCache/storeService"
-	"encoding/json"
 	"errors"
 	"log"
 	"net"
@@ -17,7 +16,7 @@ func (c *Coordinator) SetVal(args *StoreArgs, reply *StoreReply) error {
 		reply.Reply = FAIL
 		return errors.New("WRONG COMMAND")
 	}
-	//currently only
+	//currently only support string
 	store.SetValue(args.Key, args.Value, args.Expire)
 	reply.Reply = SUCCESS
 	return nil
@@ -33,14 +32,8 @@ func (c *Coordinator) GetVal(args *StoreArgs, reply *StoreReply) error {
 		reply.Reply = FAIL
 		return errors.New("NO KEY")
 	}
-	//encode json for value
-	replySeq, err := json.Marshal(val)
-	if err != nil {
-		reply.Reply = FAIL
-		return errors.New("json unmarshal failed")
-	}
 	reply.Reply = SUCCESS
-	reply.Value = string(replySeq)
+	reply.Value = val
 	return nil
 }
 

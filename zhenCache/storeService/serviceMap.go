@@ -3,7 +3,6 @@ package store
 import (
 	"basic/yinLog/logger"
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 )
@@ -72,9 +71,7 @@ func getServiceMap() StoreService {
 func (svs *serviceMap) GetValue(key string) (value interface{}, err error) {
 	defer svs.keyRL.RUnlock()
 	svs.keyRL.RLock()
-	for k, v := range svs.Store {
-		fmt.Println(k, v)
-	}
+
 	if mitem, ok := svs.Store[key]; ok {
 		if mitem.Expire >= time.Now().Unix() {
 			mitem.Expire = time.Now().Add(mitem.duration).Unix()

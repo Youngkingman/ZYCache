@@ -25,7 +25,7 @@ func call(rpcname string, args interface{}, reply interface{}) bool {
 }
 
 //get some value by cli
-func Get(key string) (string, error) {
+func Get(key string) (interface{}, error) {
 	args := StoreArgs{
 		Command: GET,
 		Key:     key,

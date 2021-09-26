@@ -15,13 +15,14 @@ const (
 type StoreArgs struct {
 	Command int
 	Key     string
-	Value   string
+	Value   interface{}
 	Expire  time.Duration
 }
 
+//the reply value is a string, the client need to assert it
 type StoreReply struct {
 	Reply int
-	Value string
+	Value interface{}
 }
 
 type ExampleArgs struct {
