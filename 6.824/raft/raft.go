@@ -19,8 +19,10 @@ package raft
 
 import (
 	//	"bytes"
+	"math/rand"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	//	"6.824/labgob"
 	"6.824/labrpc"
@@ -62,7 +64,6 @@ type Raft struct {
 	// Your data here (2A, 2B, 2C).
 	// Look at the paper's Figure 2 for a description of what
 	// state a Raft server must maintain.
-
 	//persistent state on all servers
 	currentTerm int
 	votedFor    int
@@ -76,6 +77,8 @@ type Raft struct {
 	//volatile state on leaders
 	nextIndex  []int
 	matchIndex []int
+
+	electionshouldStart bool //a heartbeat will reset this flag as false
 }
 
 // return currentTerm and whether this server
@@ -173,6 +176,14 @@ type RequestVoteReply struct {
 //
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// Your code here (2A, 2B).
+	if args.term > rf.currentTerm {
+		rf.currentTerm = args.term
+		reply.term = rf.currentTerm
+		reply.voteGrandted = true
+	} else {
+		reply.term = rf.currentTerm
+		reply.voteGrandted = false
+	}
 }
 
 //
@@ -226,7 +237,33 @@ type AppendEntriesReply struct {
 }
 
 func (rf *Raft) HeartBeat(args *AppendEntriesArgs, reply *AppendEntriesReply) {
+	//ok := rf.peers[leader].Call("Raft.HeartBeat", args, reply)
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	rf.electionshouldStart = false //kick off the election
 
+}
+
+//as a leader to send, may be it can be something else in 2B
+func (rf *Raft) SendHeartBeat() {
+	for {
+		rf.mu.Lock()
+		if rf.isleader {
+			for i := range rf.peers {
+				args := AppendEntriesArgs{
+					rf.currentTerm,
+					rf.me,
+					0, //?我无法理解，不过暂时用不到
+					nil,
+					rf.commitIndex,
+				}
+				reply := AppendEntriesReply{}
+				rf.peers[i].Call("Raft.HeartBeat", &args, &reply)
+			}
+		}
+		rf.mu.Unlock()
+		time.Sleep(180 * time.Millisecond)
+	}
 }
 
 //
@@ -278,11 +315,51 @@ func (rf *Raft) killed() bool {
 // heartsbeats recently.
 func (rf *Raft) ticker() {
 	for rf.killed() == false {
-
 		// Your code here to check if a leader election should
 		// be started and to randomize sleeping time using
 		// time.Sleep().
+		rf.mu.Lock()
+		rf.electionshouldStart = true
+		rf.mu.Unlock()
 
+		rand.Seed(makeSeed())
+		//between 300ms ~ 450ms
+		toSleep := rand.Intn(150) + 300
+		time.Sleep(time.Duration(toSleep) * time.Millisecond)
+
+		//check if an election should start
+		rf.mu.Lock()
+		defer rf.mu.Unlock()
+		if rf.electionshouldStart {
+			rf.currentTerm++ //start a new term
+			rf.votedFor = 1  //你问我资不资磁我自己，我当然资磁啊，我是特首能不资磁吗
+			failEnd := 0     //count how many ends have failed
+			for i := range rf.peers {
+				args := RequestVoteArgs{
+					rf.currentTerm,
+					rf.me,
+					0,
+					0,
+				}
+				reply := RequestVoteReply{}
+				if i != rf.me {
+					//100个教授一致通过
+					ok := rf.peers[i].Call("Raft.RequestVote", &args, &reply)
+					if !ok {
+						failEnd++
+					}
+					if ok && reply.voteGrandted {
+						rf.votedFor++
+					}
+				}
+			}
+			//中央已经决定了，就由你来当接班人
+			//当然被送进秦城的人得减掉
+			if rf.votedFor > (len(rf.peers)-failEnd)/2 {
+				rf.isleader = true
+			}
+
+		}
 	}
 }
 
@@ -303,6 +380,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.peers = peers
 	rf.persister = persister
 	rf.me = me
+	rf.electionshouldStart = false
 
 	// Your initialization code here (2A, 2B, 2C).
 
@@ -311,6 +389,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 	// start ticker goroutine to start elections
 	go rf.ticker()
+	go rf.SendHeartBeat()
 
 	return rf
 }
