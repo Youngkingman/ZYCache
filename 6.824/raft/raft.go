@@ -67,7 +67,7 @@ type Raft struct {
 	//persistent state on all servers
 	currentTerm int
 	votedFor    int
-	log         []interface{}
+	log         []Entry
 	isleader    bool
 
 	//volatile state on all servers
@@ -78,8 +78,13 @@ type Raft struct {
 	nextIndex  []int
 	matchIndex []int
 
-	electionshouldStart bool //a heartbeat will reset this flag as false
+	electionshouldStart bool
+	//md, I will use timer
+	electionTimer  *time.Timer
+	heartbeatTimer *time.Timer
 }
+
+type Entry struct{}
 
 // return currentTerm and whether this server
 // believes it is the leader.
@@ -327,8 +332,8 @@ func (rf *Raft) ticker() {
 		rf.mu.Unlock()
 
 		rand.Seed(makeSeed())
-		//between 300ms ~ 450ms
-		toSleep := rand.Intn(150) + 300
+		//between 200ms ~ 320ms
+		toSleep := rand.Intn(120) + 200
 		time.Sleep(time.Duration(toSleep) * time.Millisecond)
 
 		//check if an election should start
@@ -380,11 +385,16 @@ func (rf *Raft) ticker() {
 //
 func Make(peers []*labrpc.ClientEnd, me int,
 	persister *Persister, applyCh chan ApplyMsg) *Raft {
-	rf := &Raft{}
-	rf.peers = peers
-	rf.persister = persister
-	rf.me = me
-	rf.electionshouldStart = false
+	rf := &Raft{
+		peers:     peers,
+		persister: persister,
+		me:        me,
+		dead:      0,
+		//applyCh:applyCh,
+		currentTerm:         0,
+		votedFor:            -1,
+		electionshouldStart: false,
+	}
 
 	// Your initialization code here (2A, 2B, 2C).
 
