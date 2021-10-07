@@ -19,10 +19,10 @@ func Fuck_Client_example() {
 	a, _ := json.Marshal(test)
 	for i := 0; i < 5; i++ {
 		//rpcdef.Set("fuck", string(a), store.DefaultDuration)
-		Set("fuck", string(a), store.DefaultDuration)
+		Set("fuck", string(a), store.DefaultDuration, "127.0.0.1:1234")
 	}
 	//val, _ := rpcdef.Get("fuck")
-	val, _ := Get("fuck")
+	val, _ := Get("fuck", "127.0.0.1:1234")
 	rettest := FUCK{}
 	json.Unmarshal([]byte(val.(string)), &rettest)
 	fmt.Println(rettest)
