@@ -35,6 +35,7 @@ func (chm *ConsisteHashMap) Add(realMachineKeys ...string) {
 			chm.innerMap[hash] = key
 		}
 	}
+	sort.Ints(chm.keys)
 }
 
 func (chm *ConsisteHashMap) Get(key string) string {
