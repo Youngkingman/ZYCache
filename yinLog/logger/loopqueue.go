@@ -1,7 +1,6 @@
 package logger
 
 import (
-	keystruct "basic/zhenCache/innerDB/keystruct"
 	"sync"
 )
 
@@ -23,11 +22,11 @@ type LoopQueue struct {
 
 //command log item
 type DataItem struct {
-	Commandtype int                 `json:"commandtype"`
-	Key         keystruct.KeyStruct `json:"key"`
-	Value       interface{}         `json:"value"`
-	Expire      int64               `json:"duration"`
-	TimeStamp   int64               `json:"log_time"`
+	Commandtype int         `json:"commandtype"`
+	Key         string      `json:"key"`
+	Value       interface{} `json:"value"`
+	Expire      int64       `json:"duration"`
+	TimeStamp   int64       `json:"log_time"`
 }
 
 //for log system buffer,private queue

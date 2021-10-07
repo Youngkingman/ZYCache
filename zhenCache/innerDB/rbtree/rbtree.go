@@ -1,7 +1,6 @@
 package rbtree
 
 import (
-	keystruct "basic/zhenCache/innerDB/keystruct"
 	"sync"
 )
 
@@ -16,7 +15,7 @@ type RBTreeNode struct {
 	Parent *RBTreeNode
 	Color  uint8
 
-	key  keystruct.KeyStruct
+	key  string
 	item interface{}
 }
 
@@ -91,9 +90,9 @@ func (rbt *RBTree) insert(i *RBTreeNode, update bool) *RBTreeNode {
 
 	for cur != rbt._NIL {
 		pos = cur
-		if cur.key.CompareBiggerThan(i.key) {
+		if cur.key > i.key {
 			cur = cur.Left
-		} else if i.key.CompareBiggerThan(cur.key) {
+		} else if i.key > cur.key {
 			cur = cur.Right
 		} else {
 			//maybe change the itemue here
@@ -109,7 +108,7 @@ func (rbt *RBTree) insert(i *RBTreeNode, update bool) *RBTreeNode {
 	if pos == rbt._NIL {
 		//there is not root
 		rbt.root = i
-	} else if pos.key.CompareBiggerThan(i.key) {
+	} else if pos.key > i.key {
 		pos.Left = i
 	} else {
 		pos.Right = i
@@ -186,7 +185,7 @@ func (rbt *RBTree) findSuccessor(cur *RBTreeNode) *RBTreeNode {
 	return tmp
 }
 
-func (rbt *RBTree) delete(key keystruct.KeyStruct) *RBTreeNode {
+func (rbt *RBTree) delete(key string) *RBTreeNode {
 	toDelete := rbt.search(key)
 	if toDelete == rbt._NIL {
 		return toDelete
@@ -299,14 +298,14 @@ func (rbt *RBTree) fixAfterDelete(fixNode *RBTreeNode) {
 }
 
 //used for inner search and can be package to outside
-func (rbt *RBTree) search(key keystruct.KeyStruct) *RBTreeNode {
+func (rbt *RBTree) search(key string) *RBTreeNode {
 	cur := rbt.root
 	rbt.mtx.RLock()
 	defer rbt.mtx.RUnlock()
 	for cur != rbt._NIL {
-		if cur.key.CompareBiggerThan(key) {
+		if cur.key > key {
 			cur = cur.Left
-		} else if key.CompareBiggerThan(cur.key) {
+		} else if key > cur.key {
 			cur = cur.Right
 		}
 		if cur.key == key {
@@ -316,7 +315,7 @@ func (rbt *RBTree) search(key keystruct.KeyStruct) *RBTreeNode {
 	return cur
 }
 
-func (rbt *RBTree) preOreder(cur *RBTreeNode, condition func(interface{}) bool, keys []keystruct.KeyStruct) {
+func (rbt *RBTree) preOreder(cur *RBTreeNode, condition func(interface{}) bool, keys []string) {
 	if cur == rbt._NIL {
 		return
 	}

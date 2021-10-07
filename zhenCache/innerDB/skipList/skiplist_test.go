@@ -1,7 +1,6 @@
 package skiplist
 
 import (
-	keystruct "basic/zhenCache/innerDB/keystruct"
 	"math/rand"
 	"sync"
 	"testing"
@@ -9,18 +8,6 @@ import (
 )
 
 //Implement of SlistKey
-type IntTestKey struct {
-	keystruct.DefaultKey
-	key int
-}
-
-func (key IntTestKey) CompareBiggerThan(other keystruct.KeyStruct) bool {
-	return key.key > other.KeyInt32()
-}
-
-func (key IntTestKey) KeyInt32() int {
-	return key.key
-}
 
 var wg sync.WaitGroup
 var skList SkipList
@@ -36,7 +23,7 @@ func Test_ConcurrenyOperation(t *testing.T) {
 	wg.Add(4)
 	go func() {
 		for i := 0; i < MAX_OPERATION; i++ {
-			key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
+			key := string(rune(int(rand.Uint32())))
 			skList.InsertElement(key, "fuck you")
 		}
 		wg.Done()
@@ -44,7 +31,7 @@ func Test_ConcurrenyOperation(t *testing.T) {
 
 	go func() {
 		for i := 0; i < MAX_OPERATION; i++ {
-			key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
+			key := string(rune(int(rand.Uint32())))
 			//keySlice[i] = key
 			skList.UpdateDuplicateKey(key, "fuck you")
 		}
@@ -53,7 +40,7 @@ func Test_ConcurrenyOperation(t *testing.T) {
 
 	go func() {
 		for i := 0; i < MAX_OPERATION; i++ {
-			key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
+			key := string(rune(int(rand.Uint32())))
 			skList.Search(key)
 		}
 		wg.Done()
@@ -61,7 +48,7 @@ func Test_ConcurrenyOperation(t *testing.T) {
 
 	go func() {
 		for i := 0; i < MAX_OPERATION; i++ {
-			key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
+			key := string(rune(int(rand.Uint32())))
 			skList.Delete(key)
 		}
 		wg.Done()
@@ -73,13 +60,13 @@ func Test_ConcurrenyOperation(t *testing.T) {
 func Test_BasciFunctionTest(t *testing.T) {
 	skList = New(LEVEL_COUNT)
 	rand.Seed(time.Now().UnixNano())
-	keySlice := make([]IntTestKey, MAX_OPERATION)
+	keySlice := make([]string, MAX_OPERATION)
 	for i := 0; i < MAX_OPERATION; i++ {
-		key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
+		key := string(rune(int(rand.Uint32())))
 		skList.InsertElement(key, "fuck you")
 	}
 	for i := 0; i < MAX_OPERATION; i++ {
-		key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
+		key := string(rune(int(rand.Uint32())))
 		keySlice[i] = key
 		skList.UpdateDuplicateKey(key, "fuck you")
 	}
@@ -87,7 +74,7 @@ func Test_BasciFunctionTest(t *testing.T) {
 		skList.TopN(i)
 	}
 	for i := 0; i < MAX_OPERATION; i++ {
-		key := IntTestKey{keystruct.DefaultKey{}, int(rand.Uint32())}
+		key := string(rune(int(rand.Uint32())))
 		skList.Search(key)
 	}
 	for i := 0; i < MAX_OPERATION; i++ {

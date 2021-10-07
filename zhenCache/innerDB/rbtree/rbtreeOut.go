@@ -1,12 +1,11 @@
 package rbtree
 
 import (
-	keystruct "basic/zhenCache/innerDB/keystruct"
 	"errors"
 	"sync"
 )
 
-func (rbt *RBTree) InsertElement(key keystruct.KeyStruct, val interface{}) {
+func (rbt *RBTree) InsertElement(key string, val interface{}) {
 	node := RBTreeNode{
 		rbt._NIL,
 		rbt._NIL,
@@ -18,7 +17,7 @@ func (rbt *RBTree) InsertElement(key keystruct.KeyStruct, val interface{}) {
 	rbt.insert(&node, false)
 }
 
-func (rbt *RBTree) UpdateDuplicateKey(key keystruct.KeyStruct, val interface{}) {
+func (rbt *RBTree) UpdateDuplicateKey(key string, val interface{}) {
 	node := RBTreeNode{
 		rbt._NIL,
 		rbt._NIL,
@@ -30,7 +29,7 @@ func (rbt *RBTree) UpdateDuplicateKey(key keystruct.KeyStruct, val interface{}) 
 	rbt.insert(&node, true)
 }
 
-func (rbt *RBTree) Search(key keystruct.KeyStruct) (interface{}, bool) {
+func (rbt *RBTree) Search(key string) (interface{}, bool) {
 	ret := rbt.search(key)
 	if ret == rbt._NIL {
 		return nil, false
@@ -38,7 +37,7 @@ func (rbt *RBTree) Search(key keystruct.KeyStruct) (interface{}, bool) {
 	return ret.item, true
 }
 
-func (rbt *RBTree) Delete(key keystruct.KeyStruct) error {
+func (rbt *RBTree) Delete(key string) error {
 	ret := rbt.delete(key)
 	if ret == rbt._NIL {
 		return errors.New("no such element")
@@ -46,7 +45,7 @@ func (rbt *RBTree) Delete(key keystruct.KeyStruct) error {
 	return nil
 }
 
-func (rbt *RBTree) Range(condition func(interface{}) bool) (keys []keystruct.KeyStruct) {
+func (rbt *RBTree) Range(condition func(interface{}) bool) (keys []string) {
 	rbt.mtx.RLock()
 	rbt.preOreder(rbt.root, condition, keys)
 	rbt.mtx.RUnlock()
@@ -54,7 +53,7 @@ func (rbt *RBTree) Range(condition func(interface{}) bool) (keys []keystruct.Key
 }
 
 func New() (rbt RBTree) {
-	initNode := &RBTreeNode{nil, nil, nil, BLACK, keystruct.DefaultKey{}, nil}
+	initNode := &RBTreeNode{nil, nil, nil, BLACK, "", nil}
 	rbt = RBTree{
 		root:         initNode,
 		_NIL:         initNode,

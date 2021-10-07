@@ -1,7 +1,6 @@
 package rpcdef
 
 import (
-	"basic/zhenCache/innerDB/keystruct"
 	"errors"
 	"fmt"
 	"log"
@@ -9,8 +8,8 @@ import (
 	"time"
 )
 
-func call(rpcname string, args interface{}, reply interface{}) bool {
-	c, err := rpc.DialHTTP("tcp", "127.0.0.1"+":1234")
+func call(rpcname string, args interface{}, reply interface{}, serverAddr string) bool {
+	c, err := rpc.DialHTTP("tcp", serverAddr)
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
@@ -26,22 +25,23 @@ func call(rpcname string, args interface{}, reply interface{}) bool {
 }
 
 //get some value by cli
-func Get(key keystruct.KeyStruct) (interface{}, error) {
+func Get(key string, serverAddr string) (interface{}, error) {
 	args := StoreArgs{
 		Command: GET,
 		Key:     key,
-		Value:   nil,
+		Value:   "",
 	}
 	reply := StoreReply{}
-	call("Coordinator.Get", &args, &reply)
+	call("Coordinator.GetVal", &args, &reply, serverAddr)
 	if reply.Reply == SUCCESS {
 		return reply.Value, nil
 	}
-	return nil, errors.New("key not found")
+	return "", errors.New("key not found")
 }
 
 //set some value by cli
-func Set(key keystruct.KeyStruct, value interface{}, expire time.Duration) error {
+//need value to be marshal
+func Set(key string, value string, expire time.Duration, serverAddr string) error {
 	args := StoreArgs{
 		Command: SET,
 		Key:     key,
@@ -49,7 +49,7 @@ func Set(key keystruct.KeyStruct, value interface{}, expire time.Duration) error
 		Expire:  expire,
 	}
 	reply := StoreReply{}
-	call("Coordinator.Set", &args, &reply)
+	call("Coordinator.SetVal", &args, &reply, serverAddr)
 	if reply.Reply == SUCCESS {
 		return nil
 	}

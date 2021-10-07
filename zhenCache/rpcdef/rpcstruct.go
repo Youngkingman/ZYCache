@@ -1,7 +1,6 @@
 package rpcdef
 
 import (
-	keystruct "basic/zhenCache/innerDB/keystruct"
 	"time"
 )
 
@@ -12,15 +11,24 @@ const (
 	FAIL
 )
 
+//to utilize personal key, we need some protobuf to realize it
 type StoreArgs struct {
 	Command int
-	Key     keystruct.KeyStruct
+	Key     string
 	Value   interface{}
 	Expire  time.Duration
 }
 
+//the reply value is a string, the client need to assert it
 type StoreReply struct {
 	Reply int
-	Key   keystruct.KeyStruct
 	Value interface{}
+}
+
+type ExampleArgs struct {
+	X int
+}
+
+type ExampleReply struct {
+	Y int
 }

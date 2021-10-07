@@ -2,7 +2,6 @@ package store
 
 import (
 	"basic/yinLog/logger"
-	keystruct "basic/zhenCache/innerDB/keystruct"
 	skiplist "basic/zhenCache/innerDB/skipList"
 	"errors"
 	"time"
@@ -25,7 +24,7 @@ func getServiceSkList() StoreService {
 				//to start the servise
 				logger.LogItemPush(logger.DataItem{
 					Commandtype: logger.INITMESSAGE,
-					Key:         keystruct.DefaultKey{},
+					Key:         "",
 					Value:       nil,
 					Expire:      0,
 					TimeStamp:   time.Now().Unix(),
@@ -50,7 +49,7 @@ func getServiceSkList() StoreService {
 	return svs
 }
 
-func (svs *serviceSkList) GetValue(key keystruct.KeyStruct) (value interface{}, err error) {
+func (svs *serviceSkList) GetValue(key string) (value interface{}, err error) {
 	if mitem, ok := svs.Store.Search(key); ok {
 		if mitem.(*MemItem).Expire >= time.Now().Unix() {
 			mitem.(*MemItem).Expire = time.Now().Add(mitem.(*MemItem).duration).Unix()
@@ -60,7 +59,7 @@ func (svs *serviceSkList) GetValue(key keystruct.KeyStruct) (value interface{}, 
 	return nil, errors.New("expire")
 }
 
-func (svs *serviceSkList) SetValue(key keystruct.KeyStruct, value interface{}, expire time.Duration) {
+func (svs *serviceSkList) SetValue(key string, value interface{}, expire time.Duration) {
 	if mitem, ok := svs.Store.Search(key); ok {
 		mitem.(*MemItem).Expire = time.Now().Add(expire).Unix()
 		mitem.(*MemItem).Value = value
@@ -75,7 +74,7 @@ func (svs *serviceSkList) SetValue(key keystruct.KeyStruct, value interface{}, e
 	svs.Store.InsertElement(key, &m)
 }
 
-func (svs *serviceSkList) GetRange(keyL keystruct.KeyStruct, keyH keystruct.KeyStruct) (values []interface{}, err error) {
-	//TODO
-	return
-}
+// func (svs *serviceSkList) GetRange(keyL string, keyH keystruct.KeyStruct) (values []interface{}, err error) {
+// 	//TODO
+// 	return
+// }
