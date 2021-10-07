@@ -9,7 +9,12 @@ import (
 	"net/rpc"
 )
 
-type Coordinator struct{}
+const defaultBasePath = ""
+
+type Coordinator struct {
+	self     string
+	basePath string
+}
 
 func (c *Coordinator) SetVal(args *StoreArgs, reply *StoreReply) error {
 	if args.Command != SET {
@@ -46,10 +51,4 @@ func (c *Coordinator) CoodinatorServe() {
 		log.Fatal("listen error:", e)
 	}
 	go http.Serve(l, nil)
-}
-
-//some example
-func (c *Coordinator) Example(args *ExampleArgs, reply *ExampleReply) error {
-	reply.Y = args.X + 1
-	return nil
 }
