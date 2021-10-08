@@ -73,7 +73,7 @@ func Set(key string, value string, expire time.Duration, serverAddr string) erro
 
 服务端采用了一致性哈希算法进行负载均衡，每一个服务器自带客户端，访问任意一个服务器都会正确地将键值对存储在合适的服务器上
 
-<img src="E:\myproject\ZYCache\doc\1008_12.jpg" style="zoom:33%;" />
+<img src="ZYCache\doc\1008_12.jpg" style="zoom:33%;" />
 
 如图所示Client1访问Peer2服务端插入的键值对{"Zhenyin":1234}，Peer2对字符串"Zhenyin"经过一致性哈希计算被放置在Peer3服务器中;Client2访问Peer1查询键值{"Zhenyin"}，Peer1计算"Zhenyin"哈希值继而向Peer3获取该值。每一个Peer既是客户端也是服务端，相互之间的通信通过RPC调用实现，在一开始需要全部进行注册，实现上图的注册需要如下代码，放置于server.go中：
 
